@@ -17,12 +17,14 @@ import org.deg.core.callbacks.FileSendingEventHandler;
 import org.deg.ui.components.PeerView;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public class SendView extends VBox {
     private final ObservableList<File> filesToSend = FXCollections.observableArrayList();
     private final ObservableList<Peer> peers = FXCollections.observableArrayList();
+    private final List<Peer> manuallyAddedPeers = new ArrayList<>();
     private final Backend backend;
 
     public SendView(Backend backend) {
@@ -99,6 +101,14 @@ public class SendView extends VBox {
         plusIcon.setFitHeight(20);
         btnManualSend.setGraphic(plusIcon);
         btnManualSend.setContentDisplay(ContentDisplay.CENTER);
+        btnManualSend.setOnAction(e -> {
+            new AddPeerManually(manuallyAddedPeers).showAndWait();
+            for (Peer peer : manuallyAddedPeers) {
+                if (!peers.contains(peer)) {
+                    peers.add(peer);
+                }
+            }
+        });
 
         Button btnReloadDiscovery = new Button();
         btnReloadDiscovery.setTooltip(new Tooltip("Discover peers in the same network"));
@@ -160,6 +170,7 @@ public class SendView extends VBox {
     private void discoverPeers() {
         peers.clear();
         peers.addAll(backend.discoverPeers());
+        peers.addAll(manuallyAddedPeers);
         peers.add(new Peer("Alice", "192.168.178.49", (int)(Math.random() * 64000)));
     }
 }
