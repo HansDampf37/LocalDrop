@@ -1,5 +1,6 @@
 package org.deg.ui.views;
 
+import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -54,6 +55,7 @@ public class SendView extends VBox {
         Button btnAddFile = new Button("Add File");
         Button btnAddFolder = new Button("Add Folder");
         Button btnClear = new Button("Clear Selection");
+        btnClear.disableProperty().bind(Bindings.isEmpty(filesToSend));
         btnAddFolder.setPrefWidth(130);
         btnAddFile.setPrefWidth(130);
         btnClear.setPrefWidth(130);
@@ -175,6 +177,7 @@ public class SendView extends VBox {
         });
         peerList.setSelectionModel(null); // make elements unclickable
         discoverPeers();
+        peerList.disableProperty().bind(Bindings.isEmpty(filesToSend));
         return peerList;
     }
 
