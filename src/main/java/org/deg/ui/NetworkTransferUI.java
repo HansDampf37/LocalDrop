@@ -14,6 +14,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.deg.backend.Backend;
+import org.deg.ui.views.LogView;
 import org.deg.ui.views.ReceiveView;
 import org.deg.ui.views.SendView;
 
@@ -28,6 +29,7 @@ public class NetworkTransferUI extends Application {
     private final Backend backend = new Backend();
     private Button btnReceive;
     private Button btnSend;
+    private Button btnLogs;
 
     public NetworkTransferUI() throws IOException {
         backend.start();
@@ -73,17 +75,21 @@ public class NetworkTransferUI extends Application {
 
         btnReceive = new Button("Receive");
         btnSend = new Button("Send");
+        btnLogs = new Button("Logs");
 
         btnReceive.getStyleClass().add("nav-button");
         btnSend.getStyleClass().add("nav-button");
+        btnLogs.getStyleClass().add("nav-button");
 
         btnReceive.setMaxWidth(Double.MAX_VALUE);
         btnSend.setMaxWidth(Double.MAX_VALUE);
+        btnLogs.setMaxWidth(Double.MAX_VALUE);
         btnReceive.setMinWidth(150.0);
         btnReceive.setMinHeight(75.0);
+        btnLogs.setMinHeight(75.0);
         btnSend.setMinWidth(150.0);
         btnSend.setMinHeight(75.0);
-
+        btnLogs.setMinHeight(75.0);
 
         ImageView receiveIcon = new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/icons/user.png")).toExternalForm()));
         receiveIcon.setFitWidth(16);
@@ -93,29 +99,45 @@ public class NetworkTransferUI extends Application {
         sendIcon.setFitWidth(16);
         sendIcon.setFitHeight(16);
 
+        ImageView logsIcon = new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/icons/logs.png")).toExternalForm()));
+        logsIcon.setFitWidth(16);
+        logsIcon.setFitHeight(16);
+
         // Set icons on buttons
         btnReceive.setGraphic(receiveIcon);
         btnSend.setGraphic(sendIcon);
+        btnLogs.setGraphic(logsIcon);
 
         btnReceive.setContentDisplay(ContentDisplay.LEFT);
         btnSend.setContentDisplay(ContentDisplay.LEFT);
+        btnLogs.setContentDisplay(ContentDisplay.LEFT);
 
         btnReceive.setOnAction(e -> loadReceivePage());
         btnSend.setOnAction(e -> loadSendPage());
+        btnLogs.setOnAction(e -> loadLogsPage());
 
-        navBar.getChildren().addAll(btnReceive, btnSend);
+        navBar.getChildren().addAll(btnReceive, btnSend, btnLogs);
         return navBar;
     }
 
     private void loadReceivePage() {
         btnReceive.getStyleClass().add("active");
+        btnLogs.getStyleClass().remove("active");
         btnSend.getStyleClass().remove("active");
         mainContent.getChildren().setAll(receiveView);
     }
 
     private void loadSendPage() {
         btnReceive.getStyleClass().remove("active");
+        btnLogs.getStyleClass().remove("active");
         btnSend.getStyleClass().add("active");
         mainContent.getChildren().setAll(sendView);
+    }
+
+    private void loadLogsPage() {
+        btnReceive.getStyleClass().remove("active");
+        btnSend.getStyleClass().remove("active");
+        btnLogs.getStyleClass().add("active");
+        mainContent.getChildren().setAll(new LogView(backend));
     }
 }

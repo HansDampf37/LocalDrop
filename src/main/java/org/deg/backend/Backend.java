@@ -1,5 +1,6 @@
 package org.deg.backend;
 
+import javafx.util.Pair;
 import org.deg.core.FileReceiver;
 import org.deg.core.FileSender;
 import org.deg.core.Peer;
@@ -11,6 +12,7 @@ import org.deg.discovery.DiscoveryListener;
 import java.io.File;
 import java.io.IOException;
 import java.net.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -24,6 +26,7 @@ public class Backend {
     private final FileReceiver fileReceiver;
     private final DiscoveryListener discoveryListener;
     private static final ExecutorService executor = Executors.newCachedThreadPool();
+    private final List<Pair<Peer, File>> sentLog = new ArrayList<>();
 
     /**
      * Constructs a backend with a unique peer name, dynamic port, and LAN-compatible IP.
@@ -97,7 +100,10 @@ public class Backend {
      * @param file the file
      */
     public void startFileTransfer(Peer sender, Peer receiver, File file, FileSendingEventHandler callback) {
-        executor.submit(() -> new FileSender(sender, receiver, file).send(callback));
+        executor.submit(() -> {
+            new FileSender(sender, receiver, file).send(callback);
+            sentLog.add(new Pair<>(receiver, file));
+        });
     }
 
     /**
@@ -119,5 +125,13 @@ public class Backend {
      */
     public void startFilesTransfer(Peer sender, Peer receiver, List<File> filesToSend, FileSendingEventHandler handler) {
         startFileTransfer(sender, receiver, filesToSend.getFirst(), handler);
+    }
+
+    public List<Pair<Peer, File>> getSentLog() {
+        return sentLog;
+    }
+
+    public List<Pair<Peer, File>> getReceivedLog() {
+        return fileReceiver.getReceivedLog();
     }
 }

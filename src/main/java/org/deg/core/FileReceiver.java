@@ -1,5 +1,6 @@
 package org.deg.core;
 
+import javafx.util.Pair;
 import org.deg.core.callbacks.FileReceivingEventHandler;
 
 import java.io.DataInputStream;
@@ -8,17 +9,19 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The FileReceiver class listens on a given port for incoming file transfer requests,
  * receives metadata and file content, and stores the received file locally.
  */
 public class FileReceiver implements Runnable {
-
     private final int port;
     private boolean running = false;
     private FileReceivingEventHandler callback = null;
     private final File defaultSaveDirectory;
+    private final List<Pair<Peer, File>> receivedLog = new ArrayList<>();
 
     /**
      * Constructs a FileReceiver to listen on a specific port.
@@ -66,6 +69,7 @@ public class FileReceiver implements Runnable {
                             }
                         }
                         System.out.println("File saved as: " + outputFile.getAbsolutePath());
+                        receivedLog.add(new Pair<>(metadata.sender, outputFile));
                         if (callback != null) {
                             callback.onReceivingFinished(outputFile, metadata.sender);
                         }
@@ -91,6 +95,10 @@ public class FileReceiver implements Runnable {
      */
     public void setEventHandler(FileReceivingEventHandler callback) {
         this.callback = callback;
+    }
+
+    public List<Pair<Peer, File>> getReceivedLog() {
+        return receivedLog;
     }
 }
 
