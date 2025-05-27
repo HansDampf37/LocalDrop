@@ -8,8 +8,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The FileReceiver class listens on a given port for incoming file transfer requests,
@@ -19,7 +17,7 @@ public class FileReceiver implements Runnable {
 
     private final int port;
     private boolean running = false;
-    private final List<FileReceivingEventHandler> callbacks = new ArrayList<>();
+    private FileReceivingEventHandler callback = null;
     private final File defaultSaveDirectory;
 
     /**
@@ -53,29 +51,30 @@ public class FileReceiver implements Runnable {
                 // Step 2: Receive file
                 File outputFile = new File(defaultSaveDirectory, metadata.fileName);
                 if (!outputFile.exists()) outputFile.createNewFile();
-                for (FileReceivingEventHandler callback : callbacks) callback.onIncomingFile(outputFile, metadata.sender);
-                try (FileOutputStream fos = new FileOutputStream(outputFile)) {
-                    byte[] buffer = new byte[4096];
-                    long remaining = metadata.fileSize;
-                    int bytesRead;
-                    int totalBytesRead = 0;
-                    while (remaining > 0 && (bytesRead = dis.read(buffer, 0, (int) Math.min(buffer.length, remaining))) != -1) {
-                        fos.write(buffer, 0, bytesRead);
-                        remaining -= bytesRead;
-                        totalBytesRead += bytesRead;
-                        for (FileReceivingEventHandler callback : callbacks) {
-                            callback.onReceivingProgress((float) totalBytesRead / (float) metadata.fileSize);
+                if (callback == null || callback.onIncomingFile(outputFile, metadata.sender)) {
+                    try (FileOutputStream fos = new FileOutputStream(outputFile)) {
+                        byte[] buffer = new byte[4096];
+                        long remaining = metadata.fileSize;
+                        int bytesRead;
+                        int totalBytesRead = 0;
+                        while (remaining > 0 && (bytesRead = dis.read(buffer, 0, (int) Math.min(buffer.length, remaining))) != -1) {
+                            fos.write(buffer, 0, bytesRead);
+                            remaining -= bytesRead;
+                            totalBytesRead += bytesRead;
+                            if (callback != null) {
+                                callback.onReceivingProgress((float) totalBytesRead / (float) metadata.fileSize);
+                            }
+                        }
+                        System.out.println("File saved as: " + outputFile.getAbsolutePath());
+                        if (callback != null) {
+                            callback.onReceivingFinished(outputFile, metadata.sender);
                         }
                     }
-                    System.out.println("File saved as: " + outputFile.getAbsolutePath());
-                }
-                for (FileReceivingEventHandler callback : callbacks) {
-                    callback.onReceivingFinished(outputFile, metadata.sender);
                 }
             }
         } catch (IOException e) {
             System.err.println("Receiver error: " + e.getMessage());
-            for (FileReceivingEventHandler callback : callbacks) {
+            if (callback != null) {
                 callback.onReceivingFailed(e);
             }
         }
@@ -90,8 +89,8 @@ public class FileReceiver implements Runnable {
      * @see FileReceivingEventHandler
      * @param callback the callback method
      */
-    public void onFileReceived(FileReceivingEventHandler callback) {
-        callbacks.add(callback);
+    public void setEventHandler(FileReceivingEventHandler callback) {
+        this.callback = callback;
     }
 }
 

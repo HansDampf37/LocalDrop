@@ -31,7 +31,7 @@ public class NetworkTransferUI extends Application {
 
     public NetworkTransferUI() throws IOException {
         backend.start();
-        backend.onFileReceived(new FileReceivingHandler());
+        backend.setFileReceivedHandler(new FileReceivingHandler());
     }
 
     public static void main(String[] args) {

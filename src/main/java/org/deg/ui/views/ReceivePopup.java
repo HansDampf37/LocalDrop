@@ -1,12 +1,12 @@
 package org.deg.ui.views;
 
-import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -17,9 +17,13 @@ import javafx.stage.Stage;
 import org.deg.core.Peer;
 
 import java.io.File;
+import java.util.function.Consumer;
 
 public class ReceivePopup extends Stage {
-    public ReceivePopup(File file, Peer sender) {
+    private final ProgressBar progressBar = new ProgressBar();
+    private boolean receivingFilesOngoing = false;
+
+    public ReceivePopup(File file, Peer sender, Consumer<Boolean> onDecision) {
         super();
         initModality(Modality.APPLICATION_MODAL);
         setTitle("Data received by " + sender.name());
@@ -42,21 +46,34 @@ public class ReceivePopup extends Stage {
         HBox buttons = new HBox(10);
         Button abort = new Button("Abort");
         Button save = new Button("Save to Downloads");
+        save.setOnMouseClicked(event -> {
+            receivingFilesOngoing = true;
+            progressBar.setVisible(true);
+            onDecision.accept(true);
+        });
+        abort.setOnMouseClicked(event -> onDecision.accept(false));
 
         abort.setStyle("-fx-background-color: red; -fx-text-fill: white;");
         save.setStyle("-fx-background-color: lightgreen;");
 
-        buttons.setAlignment(Pos.CENTER);
+        buttons.setAlignment(Pos.CENTER_RIGHT);
         buttons.getChildren().addAll(abort, save);
 
-        layout.getChildren().addAll(title, profilePic, receivedFiles, buttons);
+        layout.getChildren().addAll(title, profilePic, receivedFiles, progressBar, buttons);
 
         Scene scene = new Scene(layout, 300, 400);
+
+        progressBar.setProgress(0);
+        progressBar.setVisible(false);
+        progressBar.setPrefWidth(200);
+
         setScene(scene);
-        showAndWait();
     }
 
     public void onReceivingProgress(float progress) {
-        // TODO
+        if (receivingFilesOngoing) {
+            progressBar.setVisible(true);
+            progressBar.setProgress(progress);
+        }
     }
 }

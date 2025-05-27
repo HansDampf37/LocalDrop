@@ -1,6 +1,8 @@
 package org.deg.backend;
 
-import org.deg.core.*;
+import org.deg.core.FileReceiver;
+import org.deg.core.FileSender;
+import org.deg.core.Peer;
 import org.deg.core.callbacks.FileReceivingEventHandler;
 import org.deg.core.callbacks.FileSendingEventHandler;
 import org.deg.discovery.DiscoveryBroadcaster;
@@ -99,13 +101,13 @@ public class Backend {
     }
 
     /**
-     * Adds a callback that is called whenever a file is received
+     * Adds a handler that is called whenever a file is received
      *
-     * @param callback the callback
+     * @param handler the handler
      * @see FileReceivingEventHandler
      */
-    public void onFileReceived(FileReceivingEventHandler callback) {
-        fileReceiver.onFileReceived(callback);
+    public void setFileReceivedHandler(FileReceivingEventHandler handler) {
+        fileReceiver.setEventHandler(handler);
     }
 
     /**
@@ -113,9 +115,9 @@ public class Backend {
      * @param sender the sending peer
      * @param receiver the receiving peer
      * @param filesToSend the list of files to send
-     * @param callback the callback for sending progress
+     * @param handler the handler for sending events
      */
-    public void startFilesTransfer(Peer sender, Peer receiver, List<File> filesToSend, FileSendingEventHandler callback) {
-        startFileTransfer(sender, receiver, filesToSend.getFirst(), callback);
+    public void startFilesTransfer(Peer sender, Peer receiver, List<File> filesToSend, FileSendingEventHandler handler) {
+        startFileTransfer(sender, receiver, filesToSend.getFirst(), handler);
     }
 }
