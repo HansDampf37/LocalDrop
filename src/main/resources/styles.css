@@ -44,3 +44,8 @@
     -fx-font-weight: bold;
     -fx-font-size: 20px;
 }
+
+.peerView:hover {
+    -fx-background-color: rgba(217, 242, 217, 1);;
+    -fx-cursor: hand;
+}

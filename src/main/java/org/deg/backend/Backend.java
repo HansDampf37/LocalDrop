@@ -1,9 +1,6 @@
 package org.deg.backend;
 
-import org.deg.core.FileReceivedCallback;
-import org.deg.core.FileReceiver;
-import org.deg.core.FileSender;
-import org.deg.core.Peer;
+import org.deg.core.*;
 import org.deg.discovery.DiscoveryBroadcaster;
 import org.deg.discovery.DiscoveryListener;
 
@@ -12,6 +9,8 @@ import java.io.IOException;
 import java.net.*;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Handles backend operations for LAN file sharing, including peer initialization,
@@ -21,8 +20,7 @@ public class Backend {
     public final Peer localPeer;
     private final FileReceiver fileReceiver;
     private final DiscoveryListener discoveryListener;
-    private Thread receiverThread;
-    private Thread discoveryListenerThread;
+    private static final ExecutorService executor = Executors.newCachedThreadPool();
 
     /**
      * Constructs a backend with a unique peer name, dynamic port, and LAN-compatible IP.
@@ -43,24 +41,20 @@ public class Backend {
      * Starts the backend by launching file receiver and discovery listener in background threads.
      */
     public void start() {
-        receiverThread = new Thread(fileReceiver);
-        receiverThread.setDaemon(true);
+        Thread receiverThread = new Thread(fileReceiver);
         receiverThread.start();
 
-        discoveryListenerThread = new Thread(discoveryListener);
-        discoveryListenerThread.setDaemon(true);
+        Thread discoveryListenerThread = new Thread(discoveryListener);
         discoveryListenerThread.start();
     }
 
     /**
      * Stops the backend gracefully. Currently, threads are daemonized and terminate with the app.
      */
-    public void stop() throws InterruptedException {
+    public void stop() {
         fileReceiver.stop();
         discoveryListener.stop();
-
-        receiverThread.join(1000);
-        discoveryListenerThread.join(1000);
+        executor.shutdown();
     }
 
     public List<Peer> discoverPeers() {
@@ -95,15 +89,32 @@ public class Backend {
 
     /**
      * Sends a file to another peer
-     * @param ip the other peer's ip
-     * @param port the port
+     * @param sender the sending peer
+     * @param receiver the receiving peer
      * @param file the file
      */
-    public void sendFile(String ip, int port, File file) {
-        new FileSender(ip, port, file).send();
+    public void startFileTransfer(Peer sender, Peer receiver, File file, FileSendingProgressCallback callback) {
+        executor.submit(() -> new FileSender(sender, receiver, file).send(callback));
     }
 
+    /**
+     * Adds a callback that is called whenever a file is received
+     *
+     * @param callback the callback
+     * @see FileReceivedCallback
+     */
     public void onFileReceived(FileReceivedCallback callback) {
         fileReceiver.onFileReceived(callback);
+    }
+
+    /**
+     * Sends all files over a tcp connection to the receiver
+     * @param sender the sending peer
+     * @param receiver the receiving peer
+     * @param filesToSend the list of files to send
+     * @param callback the callback for sending progress
+     */
+    public void startFilesTransfer(Peer sender, Peer receiver, List<File> filesToSend, FileSendingProgressCallback callback) {
+        startFileTransfer(sender, receiver, filesToSend.getFirst(), callback);
     }
 }

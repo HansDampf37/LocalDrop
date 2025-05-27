@@ -56,7 +56,7 @@ public class FileReceiver implements Runnable {
                         fos.write(buffer, 0, bytesRead);
                         remaining -= bytesRead;
                     }
-                    for (FileReceivedCallback callback : callbacks) callback.handle(outputFile, socket.getInetAddress());
+                    for (FileReceivedCallback callback : callbacks) callback.handle(outputFile, metadata.sender);
                     System.out.println("File saved as: " + outputFile.getAbsolutePath());
                 }
             }
@@ -70,6 +70,11 @@ public class FileReceiver implements Runnable {
         running = false;
     }
 
+    /**
+     * Adds a callback-method that is called as soon as a file is received.
+     * @see FileReceivedCallback
+     * @param callback the callback method
+     */
     public void onFileReceived(FileReceivedCallback callback) {
         callbacks.add(callback);
     }

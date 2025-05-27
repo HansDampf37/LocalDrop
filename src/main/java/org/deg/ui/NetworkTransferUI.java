@@ -1,6 +1,7 @@
 package org.deg.ui;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -11,15 +12,14 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Circle;
-import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
+import javafx.stage.*;
 import org.deg.backend.Backend;
+import org.deg.core.Peer;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 public class NetworkTransferUI extends Application {
 
@@ -31,8 +31,12 @@ public class NetworkTransferUI extends Application {
     private Button btnSend;
 
     private final ObservableList<File> filesToSend = FXCollections.observableArrayList();
+    private final ObservableList<Peer> peers = FXCollections.observableArrayList();
 
-    public NetworkTransferUI() throws IOException {}
+    public NetworkTransferUI() throws IOException {
+        backend.start();
+        backend.onFileReceived(this::showReceivePopup);
+    }
 
     public static void main(String[] args) {
         launch(args);
@@ -41,6 +45,7 @@ public class NetworkTransferUI extends Application {
     @Override
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Network Transfer UI");
+        primaryStage.setOnCloseRequest((WindowEvent event) -> backend.stop());
 
         BorderPane root = new BorderPane();
         VBox navBar = createNavBar();
@@ -54,10 +59,18 @@ public class NetworkTransferUI extends Application {
         root.setCenter(mainContent);
 
         Scene scene = new Scene(root, 800, 600);
-        scene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
+        scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/styles.css")).toExternalForm());
 
         primaryStage.setScene(scene);
         primaryStage.show();
+
+        discoverPeers();
+    }
+
+    private void discoverPeers() {
+        peers.clear();
+        peers.addAll(backend.discoverPeers());
+        peers.add(new Peer("Alice", "192.168.178.49", (int)(Math.random() * 64000)));
     }
 
     private VBox createNavBar() {
@@ -81,11 +94,11 @@ public class NetworkTransferUI extends Application {
         btnSend.setMinHeight(75.0);
 
 
-        ImageView receiveIcon = new ImageView(new Image(getClass().getResource("/icons/user.png").toExternalForm()));
+        ImageView receiveIcon = new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/icons/user.png")).toExternalForm()));
         receiveIcon.setFitWidth(16);
         receiveIcon.setFitHeight(16);
 
-        ImageView sendIcon = new ImageView(new Image(getClass().getResource("/icons/send.png").toExternalForm()));
+        ImageView sendIcon = new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/icons/send.png")).toExternalForm()));
         sendIcon.setFitWidth(16);
         sendIcon.setFitHeight(16);
 
@@ -131,7 +144,7 @@ public class NetworkTransferUI extends Application {
         nameLabel.getStyleClass().add("nameLabel");
 
         Label ipLabel = new Label("IP: " + backend.localPeer.ip());
-        Label portLabel = new Label("PORT: " + backend.localPeer.fileTransferPort());
+        Label portLabel = new Label("Port: " + backend.localPeer.fileTransferPort());
 
         box.getChildren().addAll(visibleAsLabel, profilePic, nameLabel, ipLabel, portLabel);
         return box;
@@ -165,12 +178,12 @@ public class NetworkTransferUI extends Application {
         btnAddFile.setPrefWidth(100);
         btnAddFile.getStyleClass().add("btn");
         btnAddFolder.getStyleClass().add("btn");
-        ImageView fileIcon = new ImageView(new Image(getClass().getResource("/icons/document.png").toExternalForm()));
+        ImageView fileIcon = new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/icons/document.png")).toExternalForm()));
         fileIcon.setFitWidth(40);
         fileIcon.setFitHeight(40);
         btnAddFile.setGraphic(fileIcon);
         btnAddFile.setContentDisplay(ContentDisplay.TOP);
-        ImageView folderIcon = new ImageView(new Image(getClass().getResource("/icons/folder.png").toExternalForm()));
+        ImageView folderIcon = new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/icons/folder.png")).toExternalForm()));
         folderIcon.setFitWidth(40);
         folderIcon.setFitHeight(40);
         btnAddFolder.setGraphic(folderIcon);
@@ -196,57 +209,97 @@ public class NetworkTransferUI extends Application {
 
         innerBox.getChildren().addAll(fileList, fileButtons);
 
+        HBox titleBox = new HBox(15);
+
         Label peersLabel = new Label("Peers");
         peersLabel.getStyleClass().add("h1");
-        ListView<String> peerList = new ListView<>();
-        peerList.getItems().addAll("Eve (192.168.178.3:5003)", "Bob (192.168.178.4:5003)");
 
-        HBox inputFields = new HBox(5);
-        inputFields.getChildren().addAll(
-                new Button("Insert Name"),
-                new Button("Insert IP"),
-                new Button("Insert Port")
-        );
+        Button btnManualSend = new Button();
+        btnManualSend.setTooltip(new Tooltip("Can't find the peer? Send you Data to a manually configured Peer!"));
+        btnManualSend.getStyleClass().add("btn");
+        ImageView plusIcon = new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/icons/plus.png")).toExternalForm()));
+        plusIcon.setFitWidth(20);
+        plusIcon.setFitHeight(20);
+        btnManualSend.setGraphic(plusIcon);
+        btnManualSend.setContentDisplay(ContentDisplay.CENTER);
 
-        Button btnShowPopup = new Button("Simulate Incoming Transfer");
-        btnShowPopup.setOnAction(e -> showReceivePopup());
+        Button btnReloadDiscovery = new Button();
+        btnReloadDiscovery.setTooltip(new Tooltip("Discover peers in the same network"));
+        btnReloadDiscovery.getStyleClass().add("btn");
+        ImageView reloadIcon = new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/icons/reload.png")).toExternalForm()));
+        reloadIcon.setFitWidth(20);
+        reloadIcon.setFitHeight(20);
+        btnReloadDiscovery.setGraphic(reloadIcon);
+        btnReloadDiscovery.setContentDisplay(ContentDisplay.CENTER);
+        btnReloadDiscovery.setOnAction(e -> discoverPeers());
 
-        box.getChildren().addAll(dataLabel, innerBox, peersLabel, peerList, inputFields, btnShowPopup);
+        titleBox.getChildren().addAll(peersLabel, btnManualSend, btnReloadDiscovery);
+
+        ListView<Peer> peerList = getPeerListView();
+
+        box.getChildren().addAll(dataLabel, innerBox, titleBox, peerList);
         return box;
     }
 
-    private void showReceivePopup() {
-        Stage popup = new Stage();
-        popup.initModality(Modality.APPLICATION_MODAL);
-        popup.setTitle("Data received by Alice");
+    private ListView<Peer> getPeerListView() {
+        ListView<Peer> peerList = new ListView<>();
+        peerList.setItems(peers);
+        peerList.setCellFactory(list -> new ListCell<>() {
+            @Override
+            protected void updateItem(Peer peer, boolean empty) {
+                super.updateItem(peer, empty);
+                if (empty || peer == null) {
+                    setGraphic(null);
+                } else {
+                    PeerView peerView = new PeerView(peer);
+                    peerView.setOnMouseClicked(e -> {
+                        peerView.onTransmissionStart();
+                        backend.startFilesTransfer(backend.localPeer, peer, filesToSend, peerView::setProgress);
+                    });
+                    setGraphic(peerView);
+                }
+            }
+        });
+        peerList.setSelectionModel(null); // make elements unclickable
+        return peerList;
+    }
 
-        VBox layout = new VBox(10);
-        layout.setPadding(new Insets(10));
-        layout.setAlignment(Pos.CENTER);
+    private void showReceivePopup(File file, Peer sender) {
+        Platform.runLater(() -> {
+            Stage popup = new Stage();
+            popup.initModality(Modality.APPLICATION_MODAL);
+            popup.setTitle("Data received by " + sender.name());
 
-        Label title = new Label("Data received by Alice");
-        ImageView profilePic = new ImageView(new Image("https://picsum.photos/200"));
-        profilePic.setFitWidth(200);
-        profilePic.setFitHeight(200);
-        Circle clip = new Circle(100, 100, 100);
-        profilePic.setClip(clip);
-        ListView<String> receivedFiles = new ListView<>();
-        receivedFiles.getItems().addAll("Selected_file_1.txt", "Selected_file_2.txt");
+            VBox layout = new VBox(10);
+            layout.setPadding(new Insets(10));
+            layout.setAlignment(Pos.CENTER);
 
-        HBox buttons = new HBox(10);
-        Button abort = new Button("Abort");
-        Button save = new Button("Save to Downloads");
+            Label title = new Label("Data received by");
+            Label nameBox = new Label(sender.name());
+            nameBox.getStyleClass().add("nameLabel");
+            ImageView profilePic = new ImageView(new Image("https://picsum.photos/200"));
+            profilePic.setFitWidth(200);
+            profilePic.setFitHeight(200);
+            Circle clip = new Circle(100, 100, 100);
+            profilePic.setClip(clip);
+            ListView<String> receivedFiles = new ListView<>();
+            receivedFiles.getItems().add(file.getName());
 
-        abort.setStyle("-fx-background-color: red; -fx-text-fill: white;");
-        save.setStyle("-fx-background-color: lightgreen;");
+            HBox buttons = new HBox(10);
+            Button abort = new Button("Abort");
+            Button save = new Button("Save to Downloads");
 
-        buttons.setAlignment(Pos.CENTER);
-        buttons.getChildren().addAll(abort, save);
+            abort.setStyle("-fx-background-color: red; -fx-text-fill: white;");
+            save.setStyle("-fx-background-color: lightgreen;");
 
-        layout.getChildren().addAll(title, profilePic, receivedFiles, buttons);
+            buttons.setAlignment(Pos.CENTER);
+            buttons.getChildren().addAll(abort, save);
 
-        Scene scene = new Scene(layout, 300, 400);
-        popup.setScene(scene);
-        popup.showAndWait();
+            layout.getChildren().addAll(title, profilePic, receivedFiles, buttons);
+
+            Scene scene = new Scene(layout, 300, 400);
+            popup.setScene(scene);
+            popup.showAndWait();
+        });
     }
 }

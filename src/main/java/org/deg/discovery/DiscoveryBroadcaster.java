@@ -39,7 +39,7 @@ public class DiscoveryBroadcaster {
 
             // Collect responses
             byte[] buffer = new byte[1024];
-            long endTime = System.currentTimeMillis() + 2000;
+            long endTime = System.currentTimeMillis() + 1000;
 
             while (System.currentTimeMillis() < endTime) {
                 try {
@@ -64,7 +64,6 @@ public class DiscoveryBroadcaster {
     }
 
     private boolean isSelf(Peer discovered, Peer local) {
-        return false && discovered.ip().equals(local.ip())
-                && discovered.fileTransferPort() == local.fileTransferPort();
+        return false && discovered.ip().equals(local.ip()) && discovered.fileTransferPort() == local.fileTransferPort();
     }
 }

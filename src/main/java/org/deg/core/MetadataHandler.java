@@ -15,6 +15,10 @@ public class MetadataHandler {
     public static Metadata parseMetadata(String metadataStr) {
         String[] parts = metadataStr.split("\\|");
         String fileName = "";
+        String senderName = "";
+        String senderIP = "";
+        int senderPort = 0;
+
         long fileSize = 0;
 
         for (String part : parts) {
@@ -27,11 +31,21 @@ public class MetadataHandler {
                     case "SIZE":
                         fileSize = Long.parseLong(keyVal[1]);
                         break;
+                    case "SENDER_NAME":
+                        senderName = keyVal[1];
+                        break;
+                    case "SENDER_IP":
+                        senderIP = keyVal[1];
+                        break;
+                    case "SENDER_PORT":
+                        senderPort = Integer.parseInt(keyVal[1]);
+                        break;
+
                 }
             }
         }
 
-        return new Metadata(fileName, fileSize);
+        return new Metadata(fileName, fileSize, new Peer(senderName, senderIP, senderPort));
     }
 
     /**
@@ -40,7 +54,11 @@ public class MetadataHandler {
      * @return Formatted string for transmission.
      */
     public static String buildMetadata(Metadata metadata) {
-        return "FILENAME:" + metadata.fileName + "|SIZE:" + metadata.fileSize;
+        return "FILENAME:" + metadata.fileName +
+                "|SIZE:" + metadata.fileSize +
+                "|SENDER_NAME:" + metadata.sender.name() +
+                "|SENDER_IP:" + metadata.sender.ip() +
+                "|SENDER_PORT:" + metadata.sender.fileTransferPort();
     }
 }
 
