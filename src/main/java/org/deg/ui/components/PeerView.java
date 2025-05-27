@@ -1,4 +1,4 @@
-package org.deg.ui;
+package org.deg.ui.components;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -48,7 +48,6 @@ public class PeerView extends HBox {
         if (transmittingFilesOngoing) {
             progressBar.setProgress(progress);
         }
-        if (progress == 1.0) onTransmissionStop();
     }
 
     public void onTransmissionStart() {

@@ -1,6 +1,8 @@
 package org.deg.backend;
 
 import org.deg.core.*;
+import org.deg.core.callbacks.FileReceivingEventHandler;
+import org.deg.core.callbacks.FileSendingEventHandler;
 import org.deg.discovery.DiscoveryBroadcaster;
 import org.deg.discovery.DiscoveryListener;
 
@@ -8,7 +10,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.*;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -28,12 +29,12 @@ public class Backend {
      * @throws IOException if no suitable IP address or port can be found.
      */
     public Backend() throws IOException {
-        String peerName = "Peer-" + new Random().nextInt(1000);
+        String peerName = UserConfigurations.USERNAME;
         String localIp = findLanAddress();
         int fileTransferPort = findFreePort();
 
         localPeer = new Peer(peerName, localIp, fileTransferPort);
-        fileReceiver = new FileReceiver(fileTransferPort);
+        fileReceiver = new FileReceiver(fileTransferPort, UserConfigurations.DEFAULT_SAFE_PATH);
         discoveryListener = new DiscoveryListener(localPeer);
     }
 
@@ -93,7 +94,7 @@ public class Backend {
      * @param receiver the receiving peer
      * @param file the file
      */
-    public void startFileTransfer(Peer sender, Peer receiver, File file, FileSendingProgressCallback callback) {
+    public void startFileTransfer(Peer sender, Peer receiver, File file, FileSendingEventHandler callback) {
         executor.submit(() -> new FileSender(sender, receiver, file).send(callback));
     }
 
@@ -101,9 +102,9 @@ public class Backend {
      * Adds a callback that is called whenever a file is received
      *
      * @param callback the callback
-     * @see FileReceivedCallback
+     * @see FileReceivingEventHandler
      */
-    public void onFileReceived(FileReceivedCallback callback) {
+    public void onFileReceived(FileReceivingEventHandler callback) {
         fileReceiver.onFileReceived(callback);
     }
 
@@ -114,7 +115,7 @@ public class Backend {
      * @param filesToSend the list of files to send
      * @param callback the callback for sending progress
      */
-    public void startFilesTransfer(Peer sender, Peer receiver, List<File> filesToSend, FileSendingProgressCallback callback) {
+    public void startFilesTransfer(Peer sender, Peer receiver, List<File> filesToSend, FileSendingEventHandler callback) {
         startFileTransfer(sender, receiver, filesToSend.getFirst(), callback);
     }
 }

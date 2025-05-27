@@ -1,5 +1,7 @@
 package org.deg.core;
 
+import org.deg.core.callbacks.FileSendingEventHandler;
+
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,9 +31,9 @@ public class FileSender {
 
     /**
      * Initiates the file transfer to the specified peer.
-     * @param progressCallback the callback is called whenever new bytes are sent.
+     * @param callback the callback is called whenever new bytes are sent (can be null)
      */
-    public void send(FileSendingProgressCallback progressCallback) {
+    public void send(FileSendingEventHandler callback) {
         try (Socket socket = new Socket(receiver.ip(), receiver.fileTransferPort())) {
             DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
 
@@ -48,23 +50,17 @@ public class FileSender {
                 while ((bytesRead = fis.read(buffer)) != -1) {
                     dos.write(buffer, 0, bytesRead);
                     totalBytesWritten += bytesRead;
-                    if (progressCallback != null) {
-                        progressCallback.handle((float)totalBytesWritten / (float)file.length());
+                    if (callback != null) {
+                        callback.onSendingProgress((float)totalBytesWritten / (float)file.length());
                     }
                 }
                 dos.flush();
                 System.out.println("File sent successfully.");
+                if (callback != null) callback.onFinished(file, receiver);
             }
-
         } catch (IOException e) {
             System.err.println("Sender error: " + e.getMessage());
+            if (callback != null) callback.onSendingFailed(e);
         }
-    }
-
-    /**
-     * Initiates the file transfer to the specified peer without a progressCallback
-     */
-    public void send() {
-        send(null);
     }
 }
