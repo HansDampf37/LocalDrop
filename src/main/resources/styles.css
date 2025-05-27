@@ -33,8 +33,14 @@
 }
 
 .btn {
-    -fx-background-color: #fff;
+    -fx-background-color: transparent;
 }
 .btn:hover {
-    -fx-background-color: #eee;
+    -fx-background-color: rgba(217, 242, 217, 1);
+    -fx-cursor: hand;
+}
+
+.h1 {
+    -fx-font-weight: bold;
+    -fx-font-size: 20px;
 }

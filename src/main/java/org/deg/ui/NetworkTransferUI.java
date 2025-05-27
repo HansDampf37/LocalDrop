@@ -1,21 +1,25 @@
 package org.deg.ui;
 
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Circle;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.deg.backend.Backend;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 public class NetworkTransferUI extends Application {
 
@@ -25,6 +29,8 @@ public class NetworkTransferUI extends Application {
     private final Backend backend = new Backend();
     private Button btnReceive;
     private Button btnSend;
+
+    private final ObservableList<File> filesToSend = FXCollections.observableArrayList();
 
     public NetworkTransferUI() throws IOException {}
 
@@ -136,19 +142,62 @@ public class NetworkTransferUI extends Application {
         box.setPadding(new Insets(15));
 
         Label dataLabel = new Label("Data");
-        ListView<String> fileList = new ListView<>();
-        fileList.getItems().addAll("Selected_file_1.txt", "Selected_file_2.txt");
+        dataLabel.getStyleClass().add("h1");
 
-        HBox fileButtons = new HBox(10);
+        HBox innerBox = new HBox(15);
+        innerBox.setPadding(new Insets(0));
+
+        ListView<File> fileList = new ListView<>();
+        fileList.setItems(filesToSend);
+        fileList.setCellFactory(lv -> new ListCell<>() {
+            @Override
+            protected void updateItem(File item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item.getName());
+            }
+        });
+        HBox.setHgrow(fileList, Priority.ALWAYS);
+
+        VBox fileButtons = new VBox(10);
         Button btnAddFile = new Button("Add File");
         Button btnAddFolder = new Button("Add Folder");
-        Button btnText = new Button("Text");
+        btnAddFolder.setPrefWidth(100);
+        btnAddFile.setPrefWidth(100);
         btnAddFile.getStyleClass().add("btn");
         btnAddFolder.getStyleClass().add("btn");
-        btnText.getStyleClass().add("btn");
-        fileButtons.getChildren().addAll(btnAddFile, btnAddFolder, btnText);
+        ImageView fileIcon = new ImageView(new Image(getClass().getResource("/icons/document.png").toExternalForm()));
+        fileIcon.setFitWidth(40);
+        fileIcon.setFitHeight(40);
+        btnAddFile.setGraphic(fileIcon);
+        btnAddFile.setContentDisplay(ContentDisplay.TOP);
+        ImageView folderIcon = new ImageView(new Image(getClass().getResource("/icons/folder.png").toExternalForm()));
+        folderIcon.setFitWidth(40);
+        folderIcon.setFitHeight(40);
+        btnAddFolder.setGraphic(folderIcon);
+        btnAddFolder.setContentDisplay(ContentDisplay.TOP);
+        btnAddFile.setOnAction(e -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Select File(s)");
+            List<File> selectedFiles = fileChooser.showOpenMultipleDialog(btnAddFile.getScene().getWindow());
+            if (selectedFiles != null) {
+                filesToSend.addAll(selectedFiles);
+            }
+        });
+        btnAddFolder.setOnAction(e -> {
+            DirectoryChooser directoryChooser = new DirectoryChooser();
+            directoryChooser.setTitle("Select Folder");
+            File selectedDir = directoryChooser.showDialog(btnAddFolder.getScene().getWindow());
+            if (selectedDir != null) {
+                filesToSend.add(selectedDir);
+            }
+        });
+
+        fileButtons.getChildren().addAll(btnAddFile, btnAddFolder);
+
+        innerBox.getChildren().addAll(fileList, fileButtons);
 
         Label peersLabel = new Label("Peers");
+        peersLabel.getStyleClass().add("h1");
         ListView<String> peerList = new ListView<>();
         peerList.getItems().addAll("Eve (192.168.178.3:5003)", "Bob (192.168.178.4:5003)");
 
@@ -162,7 +211,7 @@ public class NetworkTransferUI extends Application {
         Button btnShowPopup = new Button("Simulate Incoming Transfer");
         btnShowPopup.setOnAction(e -> showReceivePopup());
 
-        box.getChildren().addAll(dataLabel, fileList, fileButtons, peersLabel, peerList, inputFields, btnShowPopup);
+        box.getChildren().addAll(dataLabel, innerBox, peersLabel, peerList, inputFields, btnShowPopup);
         return box;
     }
 
