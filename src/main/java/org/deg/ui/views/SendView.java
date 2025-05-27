@@ -53,10 +53,13 @@ public class SendView extends VBox {
         VBox fileButtons = new VBox(10);
         Button btnAddFile = new Button("Add File");
         Button btnAddFolder = new Button("Add Folder");
-        btnAddFolder.setPrefWidth(100);
-        btnAddFile.setPrefWidth(100);
+        Button btnClear = new Button("Clear Selection");
+        btnAddFolder.setPrefWidth(130);
+        btnAddFile.setPrefWidth(130);
+        btnClear.setPrefWidth(130);
         btnAddFile.getStyleClass().add("btn");
         btnAddFolder.getStyleClass().add("btn");
+        btnClear.getStyleClass().add("btn");
         ImageView fileIcon = new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/icons/document.png")).toExternalForm()));
         fileIcon.setFitWidth(40);
         fileIcon.setFitHeight(40);
@@ -67,6 +70,11 @@ public class SendView extends VBox {
         folderIcon.setFitHeight(40);
         btnAddFolder.setGraphic(folderIcon);
         btnAddFolder.setContentDisplay(ContentDisplay.TOP);
+        ImageView clearIcon = new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/icons/clear.png")).toExternalForm()));
+        clearIcon.setFitWidth(40);
+        clearIcon.setFitHeight(40);
+        btnClear.setGraphic(clearIcon);
+        btnClear.setContentDisplay(ContentDisplay.TOP);
         btnAddFile.setOnAction(e -> {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Select File(s)");
@@ -83,8 +91,11 @@ public class SendView extends VBox {
                 filesToSend.add(selectedDir);
             }
         });
+        btnClear.setOnAction(e -> {
+            filesToSend.clear();
+        });
 
-        fileButtons.getChildren().addAll(btnAddFile, btnAddFolder);
+        fileButtons.getChildren().addAll(btnAddFile, btnAddFolder, btnClear);
 
         innerBox.getChildren().addAll(fileList, fileButtons);
 
