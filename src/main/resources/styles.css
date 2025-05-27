@@ -1,0 +1,29 @@
+/* style.css */
+.root {
+    -fx-font-family: "Segoe UI", sans-serif;
+}
+
+.nav-button {
+    -fx-background-color: #d9f2d9;
+    -fx-border-color: #cccccc;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 10px;
+    -fx-font-size: 14px;
+}
+
+.nav-button:hover {
+    -fx-background-color: #c0e7c0;
+}
+
+.page {
+    -fx-padding: 20px;
+}
+
+.title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+}
+
+.profile-pic {
+    -fx-border-radius: 50;
+}

@@ -8,21 +8,25 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
+import javafx.scene.shape.Circle;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.deg.backend.Backend;
+
+import java.io.IOException;
 
 public class NetworkTransferUI extends Application {
 
     private StackPane mainContent;
     private Pane receiveView;
     private Pane sendView;
+    private Backend backend = new Backend();
+
+    public NetworkTransferUI() throws IOException {
+    }
 
     public static void main(String[] args) {
-        try {
-            launch(args);
-        } catch (Exception e) {
-            //e.printStackTrace();
-        }
+        launch(args);
     }
 
     @Override
@@ -41,6 +45,8 @@ public class NetworkTransferUI extends Application {
         root.setCenter(mainContent);
 
         Scene scene = new Scene(root, 800, 600);
+        scene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
+
         primaryStage.setScene(scene);
         primaryStage.show();
     }
@@ -49,7 +55,6 @@ public class NetworkTransferUI extends Application {
         VBox navBar = new VBox();
         navBar.setPadding(new Insets(10));
         navBar.setSpacing(10);
-        navBar.setStyle("-fx-background-color: #d4edc9;");
         navBar.setPrefWidth(100);
 
         Button btnReceive = new Button("Receive");
@@ -69,12 +74,21 @@ public class NetworkTransferUI extends Application {
         VBox box = new VBox(10);
         box.setAlignment(Pos.CENTER);
 
-        ImageView owlImage = new ImageView(new Image("https://picsum.photos/200"));
-        Label nameLabel = new Label("You are visible as Alice");
-        Label ipLabel = new Label("IP: 192.168.178.2");
-        Label portLabel = new Label("PORT: 5001");
+        Label visibleAsLabel = new Label("You are visible as:");
 
-        box.getChildren().addAll(owlImage, nameLabel, ipLabel, portLabel);
+        ImageView profile_pic = new ImageView(new Image("https://picsum.photos/200"));
+        profile_pic.setFitWidth(200);
+        profile_pic.setFitHeight(200);
+        Circle clip = new Circle(100, 100, 100);
+        profile_pic.setClip(clip);
+
+        Label nameLabel = new Label(backend.localPeer.name());
+        nameLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 20px;");
+
+        Label ipLabel = new Label("IP: " + backend.localPeer.ip());
+        Label portLabel = new Label("PORT: " + backend.localPeer.fileTransferPort());
+
+        box.getChildren().addAll(visibleAsLabel, profile_pic, nameLabel, ipLabel, portLabel);
         return box;
     }
 
