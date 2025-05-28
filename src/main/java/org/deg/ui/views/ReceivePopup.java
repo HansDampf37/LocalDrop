@@ -15,9 +15,9 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.deg.core.FileWithRelativePath;
 import org.deg.core.Peer;
 
-import java.io.File;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -26,7 +26,7 @@ public class ReceivePopup extends Stage {
     private final ProgressBar progressBar = new ProgressBar();
     private boolean receivingFilesOngoing = false;
 
-    public ReceivePopup(List<File> files, Peer sender, Consumer<Boolean> onDecision) {
+    public ReceivePopup(List<FileWithRelativePath> files, Peer sender, Consumer<Boolean> onDecision) {
         super();
         initModality(Modality.APPLICATION_MODAL);
         setTitle("Data received by " + sender.name());
@@ -44,7 +44,7 @@ public class ReceivePopup extends Stage {
         Circle clip = new Circle(100, 100, 100);
         profilePic.setClip(clip);
         ListView<String> receivedFiles = new ListView<>();
-        receivedFiles.setItems(FXCollections.observableList(files.stream().map(File::getName).collect(Collectors.toList())));
+        receivedFiles.setItems(FXCollections.observableList(files.stream().map((FileWithRelativePath f) -> f.relativePath).collect(Collectors.toList())));
 
         HBox buttons = new HBox(10);
         Button abort = new Button("Abort");

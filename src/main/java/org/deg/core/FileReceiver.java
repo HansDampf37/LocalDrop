@@ -6,6 +6,7 @@ import org.deg.core.callbacks.FileReceivingEventHandler;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +23,7 @@ public class FileReceiver implements Runnable {
 
     /**
      * Constructs a FileReceiver to listen on a specific port.
+     *
      * @param port The TCP port to listen on.
      */
     public FileReceiver(int port, File defaultSaveDirectory) {
@@ -42,12 +44,17 @@ public class FileReceiver implements Runnable {
                 DataInputStream dis = new DataInputStream(socket.getInputStream());
 
                 // Step 1: Read metadata
-                String metadataStr = dis.readUTF();
+                int length = dis.readInt();
+                byte[] data = new byte[length];
+                dis.readFully(data);
+                String metadataStr = new String(data, StandardCharsets.UTF_8);
                 Metadata metadata = MetadataHandler.parseMetadata(metadataStr);
                 System.out.println("Transmission request received from " + metadata.sender.name() + ", Filename: " + metadata.fileNames);
 
                 // Step 2: Accept transmission
-                List<File> outputFiles = metadata.fileNames.stream().map((name) -> new File(defaultSaveDirectory, name)).toList();
+                List<FileWithRelativePath> outputFiles = metadata.fileNames.stream().map(
+                        (name) -> new FileWithRelativePath(new File(defaultSaveDirectory, name), name)
+                ).toList();
                 DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
                 if (callback == null || callback.onIncomingFile(outputFiles, metadata.sender)) {
                     dos.writeUTF("ACCEPT");
@@ -59,13 +66,14 @@ public class FileReceiver implements Runnable {
                 }
 
                 // Step 3: Receive transmission
-                System.out.println("Start receiving of files " + outputFiles.stream().map(File::getName).toList());
+                System.out.println("Start receiving of files " + outputFiles.stream().map((FileWithRelativePath f) -> f.file.getName()).toList());
                 for (int i = 0; i < outputFiles.size(); i++) {
                     long fileSize = metadata.fileSizes.get(i);
-                    File outputFile = outputFiles.get(i);
-                    if (!outputFile.exists()) outputFile.createNewFile();
+                    FileWithRelativePath outputFile = outputFiles.get(i);
+                    if (!outputFile.file.getParentFile().exists()) outputFile.file.getParentFile().mkdirs();
+                    if (!outputFile.file.exists()) outputFile.file.createNewFile();
 
-                    try (FileOutputStream fos = new FileOutputStream(outputFile)) {
+                    try (FileOutputStream fos = new FileOutputStream(outputFile.file)) {
                         byte[] buffer = new byte[4096];
                         long remaining = fileSize;
                         int bytesRead;
@@ -79,8 +87,8 @@ public class FileReceiver implements Runnable {
                             }
                         }
                     }
-                    System.out.println("Finished receiving of file " + outputFile.getAbsolutePath());
-                    receivedLog.add(new Pair<>(metadata.sender, outputFile));
+                    System.out.println("Finished receiving of file " + outputFile.file.getAbsolutePath());
+                    receivedLog.add(new Pair<>(metadata.sender, outputFile.file));
                     if (callback != null) callback.onReceivingFinished(outputFile, metadata.sender);
                 }
                 System.out.println("All files received successfully");
@@ -100,8 +108,9 @@ public class FileReceiver implements Runnable {
 
     /**
      * Adds a callback-method that is called as soon as a file is received.
-     * @see FileReceivingEventHandler
+     *
      * @param callback the callback method
+     * @see FileReceivingEventHandler
      */
     public void setEventHandler(FileReceivingEventHandler callback) {
         this.callback = callback;

@@ -1,10 +1,10 @@
 package org.deg.core;
 
-import org.deg.backend.FileExpander;
 import org.deg.core.callbacks.FileSendingEventHandler;
 
 import java.io.*;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -14,7 +14,7 @@ import java.util.List;
 public class FileSender {
     private final Peer sender;
     private final Peer receiver;
-    private final List<File> files;
+    private final List<FileWithRelativePath> files;
 
     /**
      * Constructs a FileSender for a set of files and target peer.
@@ -24,7 +24,7 @@ public class FileSender {
      * @param files    The files to send.
      */
     public FileSender(Peer sender, Peer receiver, List<File> files) {
-        this.files = FileExpander.expandFiles(files);
+        this.files = FileExpander.expandFilesWithRelativePaths(files);
         this.sender = sender;
         this.receiver = receiver;
     }
@@ -42,12 +42,14 @@ public class FileSender {
             System.out.println("Send transmission request to " + receiver.name());
             Metadata metadata = new Metadata(
                     files.size(),
-                    files.stream().map(File::getName).toList(),
-                    files.stream().map(File::length).toList(),
+                    files.stream().map((FileWithRelativePath f) -> f.relativePath).toList(),
+                    files.stream().map((FileWithRelativePath f) -> f.file.length()).toList(),
                     sender
             );
             String metadataStr = MetadataHandler.buildMetadata(metadata);
-            dos.writeUTF(metadataStr);
+            byte[] data = metadataStr.getBytes(StandardCharsets.UTF_8);
+            dos.writeInt(data.length);
+            dos.write(data);
 
             // Step 2: Wait until accepted
             System.out.println("Waiting for transmission request response...");
@@ -60,7 +62,7 @@ public class FileSender {
             // Step 3: Send file content
             System.out.println(receiver.name() + " accepted transmission. Start sending files...");
             int totalBytesWritten = 0;
-            for (File file : files) {
+            for (File file : files.stream().map((FileWithRelativePath f) -> f.file).toList()) {
                 try (FileInputStream fis = new FileInputStream(file)) {
                     byte[] buffer = new byte[4096];
                     int bytesRead;

@@ -1,6 +1,7 @@
 package org.deg.ui;
 
 import javafx.application.Platform;
+import org.deg.core.FileWithRelativePath;
 import org.deg.core.Peer;
 import org.deg.core.callbacks.FileReceivingEventHandler;
 import org.deg.ui.views.ReceivePopup;
@@ -14,7 +15,7 @@ public class FileReceivingHandler implements FileReceivingEventHandler {
     private ReceivePopup receivePopup = null;
 
     @Override
-    public boolean onIncomingFile(List<File> files, Peer sender) {
+    public boolean onIncomingFile(List<FileWithRelativePath> files, Peer sender) {
         CompletableFuture<Boolean> userResponse = new CompletableFuture<>();
 
         Platform.runLater(() -> {
@@ -37,14 +38,14 @@ public class FileReceivingHandler implements FileReceivingEventHandler {
     }
 
     @Override
-    public void onReceivingProgress(File file, float progress) {
+    public void onReceivingProgress(FileWithRelativePath file, float progress) {
         if (receivePopup != null) {
             receivePopup.onReceivingProgress(progress); // TODO
         }
     }
 
     @Override
-    public void onReceivingFinished(File file, Peer sender) {
+    public void onReceivingFinished(FileWithRelativePath file, Peer sender) {
         // TODO
     }
 
