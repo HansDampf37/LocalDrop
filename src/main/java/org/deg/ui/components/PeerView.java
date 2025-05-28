@@ -35,8 +35,8 @@ enum PeerState {
  */
 public class PeerView extends HBox {
     private final Label filesSentCounterLabel;
-    private final ProgressBar progressBar = new ProgressBar();
     private final Label transmissionRateLabel;
+    private final ProgressBar progressBar = new ProgressBar();
     private final ProgressIndicator spinner = new ProgressIndicator();;
     private PeerState state = PeerState.DEFAULT;
 
@@ -69,7 +69,7 @@ public class PeerView extends HBox {
         transmissionRateLabel.setVisible(false);
 
 
-        getChildren().addAll(avatar, textBox, gap, spinner, filesSentCounterLabel, progressBar);
+        getChildren().addAll(avatar, textBox, gap, filesSentCounterLabel, progressBar, transmissionRateLabel, spinner);
         getStyleClass().add("peerView");
     }
 
@@ -77,7 +77,7 @@ public class PeerView extends HBox {
         if (state == PeerState.SENDING) {
             progressBar.setProgress(progress.totalProgress());
             filesSentCounterLabel.setText(progress.filesTransmitted + "/" + progress.totalFiles);
-            transmissionRateLabel.setText(progress.bitsPerSecondEstimation + " bps");
+            transmissionRateLabel.setText(progress.megaBitsPerSecondEstimation + " Mbit/s");
         }
     }
 
@@ -98,6 +98,7 @@ public class PeerView extends HBox {
         progressBar.setVisible(true);
         filesSentCounterLabel.setText("0");
         filesSentCounterLabel.setVisible(true);
+        transmissionRateLabel.setVisible(true);
         spinner.setVisible(false);
     }
 
@@ -105,6 +106,7 @@ public class PeerView extends HBox {
         state = PeerState.DEFAULT;
         progressBar.setVisible(false);
         filesSentCounterLabel.setVisible(false);
+        transmissionRateLabel.setVisible(false);
         spinner.setVisible(false);
     }
 }
