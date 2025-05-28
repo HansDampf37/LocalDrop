@@ -1,5 +1,6 @@
 package org.deg.ui.views;
 
+import javafx.animation.RotateTransition;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
@@ -13,6 +14,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
+import javafx.util.Duration;
 import org.deg.backend.Backend;
 import org.deg.core.Peer;
 import org.deg.core.callbacks.FileSendingEventHandler;
@@ -23,12 +25,17 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class SendView extends VBox {
+    private static final ExecutorService executor = Executors.newCachedThreadPool();
     private final ObservableList<File> filesToSend = FXCollections.observableArrayList();
     private final ObservableList<Peer> peers = FXCollections.observableArrayList();
     private final List<Peer> manuallyAddedPeers = new ArrayList<>();
     private final Backend backend;
+    private final RotateTransition rotate;
+    private final ImageView reloadIcon;
 
     public SendView(Backend backend) {
         super(15);
@@ -128,9 +135,13 @@ public class SendView extends VBox {
         Button btnReloadDiscovery = new Button();
         btnReloadDiscovery.setTooltip(new Tooltip("Discover peers in the same network"));
         btnReloadDiscovery.getStyleClass().add("btn");
-        ImageView reloadIcon = new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/icons/reload.png")).toExternalForm()));
+        reloadIcon = new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/icons/reload.png")).toExternalForm()));
         reloadIcon.setFitWidth(20);
         reloadIcon.setFitHeight(20);
+        rotate = new RotateTransition(Duration.seconds(10), reloadIcon);
+        rotate.setByAngle(3600);
+        rotate.setCycleCount(RotateTransition.INDEFINITE);
+        rotate.setInterpolator(javafx.animation.Interpolator.LINEAR);
         btnReloadDiscovery.setGraphic(reloadIcon);
         btnReloadDiscovery.setContentDisplay(ContentDisplay.CENTER);
         btnReloadDiscovery.setOnAction(e -> discoverPeers());
@@ -160,7 +171,8 @@ public class SendView extends VBox {
                         }
 
                         @Override
-                        public void onFinished(File file, Peer receiver) {}
+                        public void onFinished(File file, Peer receiver) {
+                        }
 
                         @Override
                         public void onFinished(Peer receiver) {
@@ -198,8 +210,18 @@ public class SendView extends VBox {
     }
 
     private void discoverPeers() {
-        peers.clear();
-        peers.addAll(backend.discoverPeers());
-        peers.addAll(manuallyAddedPeers);
+        executor.submit(() -> {
+            Platform.runLater(() -> {
+                rotate.play();
+                peers.clear();
+            });
+            List<Peer> discoveredPeers = backend.discoverPeers();
+            Platform.runLater(() -> {
+                peers.addAll(discoveredPeers);
+                peers.addAll(manuallyAddedPeers);
+                rotate.stop();
+                reloadIcon.setRotate(0);
+            });
+        });
     }
 }

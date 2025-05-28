@@ -69,7 +69,7 @@ public class ReceivePopup extends Stage {
 
         layout.getChildren().addAll(title, nameBox, profilePic, receivedFiles, details, progressBar, buttons);
 
-        Scene scene = new Scene(layout, 300, 400);
+        Scene scene = new Scene(layout, 500, 500);
 
         progressBar.setProgress(0);
         progressBar.setVisible(false);
