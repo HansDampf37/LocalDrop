@@ -169,7 +169,7 @@ public class SendView extends VBox {
 
                         @Override
                         public void onDenied(Peer receiver) {
-                            System.out.println("Denied"); // TODO
+                            Platform.runLater(peerView::onTransmissionRejected);
                         }
 
                         @Override
@@ -184,6 +184,7 @@ public class SendView extends VBox {
                         }
                     };
                     peerView.setOnMouseClicked(e -> {
+                        peerView.onTransmissionRequested();
                         backend.startFilesTransfer(backend.localPeer, peer, filesToSend, callback);
                     });
                     setGraphic(peerView);
