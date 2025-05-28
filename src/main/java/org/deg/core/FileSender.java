@@ -2,10 +2,7 @@ package org.deg.core;
 
 import org.deg.core.callbacks.FileSendingEventHandler;
 
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 
 /**
@@ -33,16 +30,26 @@ public class FileSender {
      * Initiates the file transfer to the specified peer.
      * @param callback the callback is called whenever new bytes are sent (can be null)
      */
-    public void send(FileSendingEventHandler callback) {
+    public void send(FileSendingEventHandler callback) throws SendingDeniedException {
         try (Socket socket = new Socket(receiver.ip(), receiver.fileTransferPort())) {
             DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
 
             // Step 1: Send metadata
+            System.out.println("Send transmission request to " + receiver.name());
             Metadata metadata = new Metadata(file.getName(), file.length(), sender);
             String metadataStr = MetadataHandler.buildMetadata(metadata);
             dos.writeUTF(metadataStr);
 
-            // Step 2: Send file content
+            // Step 2: Wait until accepted
+            System.out.println("Waiting for transmission request response...");
+            DataInputStream dis = new DataInputStream(socket.getInputStream());
+            String accepted = dis.readUTF();
+            if (!accepted.equals("ACCEPT")) {
+                throw new SendingDeniedException();
+            }
+
+            // Step 3: Send file content
+            System.out.println(receiver.name() + " accepted transmission. Start sending file...");
             int totalBytesWritten = 0;
             try (FileInputStream fis = new FileInputStream(file)) {
                 byte[] buffer = new byte[4096];
@@ -51,11 +58,11 @@ public class FileSender {
                     dos.write(buffer, 0, bytesRead);
                     totalBytesWritten += bytesRead;
                     if (callback != null) {
-                        callback.onSendingProgress((float)totalBytesWritten / (float)file.length());
+                        callback.onSendingProgress((float) totalBytesWritten / (float) file.length());
                     }
                 }
                 dos.flush();
-                System.out.println("File sent successfully.");
+                System.out.println("File sending finished successfully.");
                 if (callback != null) callback.onFinished(file, receiver);
             }
         } catch (IOException e) {

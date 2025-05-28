@@ -3,10 +3,7 @@ package org.deg.core;
 import javafx.util.Pair;
 import org.deg.core.callbacks.FileReceivingEventHandler;
 
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -42,38 +39,46 @@ public class FileReceiver implements Runnable {
             System.out.println("Receiver listening on port " + port + "...");
             while (running) {
                 Socket socket = serverSocket.accept();
-                System.out.println("Connection received from " + socket.getInetAddress());
-
                 DataInputStream dis = new DataInputStream(socket.getInputStream());
 
                 // Step 1: Read metadata
                 String metadataStr = dis.readUTF();
                 Metadata metadata = MetadataHandler.parseMetadata(metadataStr);
-                System.out.println("Receiving file: " + metadata.fileName + " (" + metadata.fileSize + " bytes)");
+                System.out.println("Transmission request received from " + metadata.sender.name() + ", Filename: " + metadata.fileName);
 
-                // Step 2: Receive file
+                // Step 2: Accept transmission
                 File outputFile = new File(defaultSaveDirectory, metadata.fileName);
-                if (!outputFile.exists()) outputFile.createNewFile();
+                DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
                 if (callback == null || callback.onIncomingFile(outputFile, metadata.sender)) {
-                    try (FileOutputStream fos = new FileOutputStream(outputFile)) {
-                        byte[] buffer = new byte[4096];
-                        long remaining = metadata.fileSize;
-                        int bytesRead;
-                        int totalBytesRead = 0;
-                        while (remaining > 0 && (bytesRead = dis.read(buffer, 0, (int) Math.min(buffer.length, remaining))) != -1) {
-                            fos.write(buffer, 0, bytesRead);
-                            remaining -= bytesRead;
-                            totalBytesRead += bytesRead;
-                            if (callback != null) {
-                                callback.onReceivingProgress((float) totalBytesRead / (float) metadata.fileSize);
-                            }
-                        }
-                        System.out.println("File saved as: " + outputFile.getAbsolutePath());
-                        receivedLog.add(new Pair<>(metadata.sender, outputFile));
+                    dos.writeUTF("ACCEPT");
+                    System.out.println("Accept transmission request");
+                } else {
+                    dos.writeUTF("DENY");
+                    System.out.println("Deny transmission request");
+                    continue;
+                }
+
+                // Step 3: Receive transmission
+                System.out.println("Start receiving of file " + outputFile.getAbsolutePath());
+                if (!outputFile.exists()) outputFile.createNewFile();
+                try (FileOutputStream fos = new FileOutputStream(outputFile)) {
+                    byte[] buffer = new byte[4096];
+                    long remaining = metadata.fileSize;
+                    int bytesRead;
+                    int totalBytesRead = 0;
+                    while (remaining > 0 && (bytesRead = dis.read(buffer, 0, (int) Math.min(buffer.length, remaining))) != -1) {
+                        fos.write(buffer, 0, bytesRead);
+                        remaining -= bytesRead;
+                        totalBytesRead += bytesRead;
                         if (callback != null) {
-                            callback.onReceivingFinished(outputFile, metadata.sender);
+                            callback.onReceivingProgress((float) totalBytesRead / (float) metadata.fileSize);
                         }
                     }
+                }
+                System.out.println("Finished receiving of file " + outputFile.getAbsolutePath());
+                receivedLog.add(new Pair<>(metadata.sender, outputFile));
+                if (callback != null) {
+                    callback.onReceivingFinished(outputFile, metadata.sender);
                 }
             }
         } catch (IOException e) {

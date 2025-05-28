@@ -4,6 +4,7 @@ import javafx.util.Pair;
 import org.deg.core.FileReceiver;
 import org.deg.core.FileSender;
 import org.deg.core.Peer;
+import org.deg.core.SendingDeniedException;
 import org.deg.core.callbacks.FileReceivingEventHandler;
 import org.deg.core.callbacks.FileSendingEventHandler;
 import org.deg.discovery.DiscoveryBroadcaster;
@@ -101,7 +102,11 @@ public class Backend {
      */
     public void startFileTransfer(Peer sender, Peer receiver, File file, FileSendingEventHandler callback) {
         executor.submit(() -> {
-            new FileSender(sender, receiver, file).send(callback);
+            try {
+                new FileSender(sender, receiver, file).send(callback);
+            } catch (SendingDeniedException e) {
+                System.out.println("Sending denied");
+            }
             sentLog.add(new Pair<>(receiver, file));
         });
     }
