@@ -56,7 +56,7 @@ public class FileReceiver implements Runnable {
                         (name) -> new FileWithRelativePath(new File(defaultSaveDirectory, name), name)
                 ).toList();
                 DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
-                if (callback == null || callback.onIncomingFile(outputFiles, metadata.sender)) {
+                if (callback == null || callback.onIncomingFiles(outputFiles, metadata.sender)) {
                     dos.writeUTF("ACCEPT");
                     System.out.println("Accept transmission request");
                 } else {

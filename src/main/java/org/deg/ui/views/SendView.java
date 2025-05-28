@@ -1,5 +1,6 @@
 package org.deg.ui.views;
 
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -15,6 +16,7 @@ import javafx.stage.FileChooser;
 import org.deg.backend.Backend;
 import org.deg.core.Peer;
 import org.deg.core.callbacks.FileSendingEventHandler;
+import org.deg.core.callbacks.Progress;
 import org.deg.ui.components.PeerView;
 
 import java.io.File;
@@ -153,15 +155,28 @@ public class SendView extends VBox {
                     PeerView peerView = new PeerView(peer);
                     FileSendingEventHandler callback = new FileSendingEventHandler() {
                         @Override
-                        public void onSendingProgress(File file, float progress) {
-                            peerView.setProgress(progress);
+                        public void onSendingProgress(Progress progress) {
+                            Platform.runLater(() -> peerView.setProgress(progress));
                         }
 
                         @Override
-                        public void onFinished(File file, Peer receiver) { peerView.increaseFileCounter(); }
+                        public void onFinished(File file, Peer receiver) {}
 
                         @Override
-                        public void onFinished(Peer receiver) { peerView.onTransmissionStop(); }
+                        public void onFinished(Peer receiver) {
+                            Platform.runLater(peerView::onTransmissionStop);
+                        }
+
+                        @Override
+                        public void onDenied(Peer receiver) {
+                            System.out.println("Denied"); // TODO
+                        }
+
+                        @Override
+                        public void onAccepted(Peer receiver) {
+                            Platform.runLater(peerView::onTransmissionStart);
+                            // TODO
+                        }
 
                         @Override
                         public void onSendingFailed(Exception e) {
@@ -169,7 +184,6 @@ public class SendView extends VBox {
                         }
                     };
                     peerView.setOnMouseClicked(e -> {
-                        peerView.onTransmissionStart();
                         backend.startFilesTransfer(backend.localPeer, peer, filesToSend, callback);
                     });
                     setGraphic(peerView);

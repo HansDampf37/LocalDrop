@@ -10,10 +10,9 @@ import java.io.File;
 public interface FileSendingEventHandler {
     /**
      * Is called when new bytes of the file are sent.
-     * @param file the file to send
-     * @param progress The total progress between 0 and 1
+     * @param progress The total progress
      */
-    void onSendingProgress(File file, float progress);
+    void onSendingProgress(Progress progress);
 
     /**
      * Is called when the file was successfully transmitted
@@ -33,4 +32,15 @@ public interface FileSendingEventHandler {
      * @param receiver the receiving peer
      */
     void onFinished(Peer receiver);
+
+    /**
+     * Is called when the receiver denies the transmission request
+     */
+    void onDenied(Peer receiver);
+
+    /**
+     * Is called when the receiver accepts the transmission request
+     */
+    void onAccepted(Peer receiver);
 }
+

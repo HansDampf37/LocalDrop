@@ -35,16 +35,21 @@ public class ReceivePopup extends Stage {
         layout.setPadding(new Insets(10));
         layout.setAlignment(Pos.CENTER);
 
-        Label title = new Label("Data received by");
+        Label title = new Label("Incoming Data by");
         Label nameBox = new Label(sender.name());
         nameBox.getStyleClass().add("nameLabel");
+
         ImageView profilePic = new ImageView(new Image("https://picsum.photos/200"));
         profilePic.setFitWidth(200);
         profilePic.setFitHeight(200);
         Circle clip = new Circle(100, 100, 100);
         profilePic.setClip(clip);
+
         ListView<String> receivedFiles = new ListView<>();
         receivedFiles.setItems(FXCollections.observableList(files.stream().map((FileWithRelativePath f) -> f.relativePath).collect(Collectors.toList())));
+        int numberOfFiles = files.size();
+        long numberOfBytes = files.stream().mapToLong((FileWithRelativePath f) -> f.file.length()).sum();
+        Label details = new Label(numberOfFiles + " files, " + numberOfBytes + " bytes");
 
         HBox buttons = new HBox(10);
         Button abort = new Button("Abort");
@@ -62,7 +67,7 @@ public class ReceivePopup extends Stage {
         buttons.setAlignment(Pos.CENTER_RIGHT);
         buttons.getChildren().addAll(abort, save);
 
-        layout.getChildren().addAll(title, profilePic, receivedFiles, progressBar, buttons);
+        layout.getChildren().addAll(title, nameBox, profilePic, receivedFiles, details, progressBar, buttons);
 
         Scene scene = new Scene(layout, 300, 400);
 

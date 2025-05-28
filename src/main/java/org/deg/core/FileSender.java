@@ -1,6 +1,7 @@
 package org.deg.core;
 
 import org.deg.core.callbacks.FileSendingEventHandler;
+import org.deg.core.callbacks.Progress;
 
 import java.io.*;
 import java.net.Socket;
@@ -56,24 +57,34 @@ public class FileSender {
             DataInputStream dis = new DataInputStream(socket.getInputStream());
             String accepted = dis.readUTF();
             if (!accepted.equals("ACCEPT")) {
+                if (callback != null) callback.onDenied(receiver);
                 throw new SendingDeniedException();
+            } else {
+                System.out.println(receiver.name() + " accepted transmission. Start sending files...");
+                if (callback != null) callback.onAccepted(receiver);
             }
 
             // Step 3: Send file content
-            System.out.println(receiver.name() + " accepted transmission. Start sending files...");
-            int totalBytesWritten = 0;
+            int i = 0;
+            int totalBytesSent = 0;
+            long totalBytes = files.stream().mapToLong(f -> f.file.length()).sum();
             for (File file : files.stream().map((FileWithRelativePath f) -> f.file).toList()) {
                 try (FileInputStream fis = new FileInputStream(file)) {
+                    long startTimeFile = System.currentTimeMillis();
                     byte[] buffer = new byte[4096];
                     int bytesRead;
                     while ((bytesRead = fis.read(buffer)) != -1) {
                         dos.write(buffer, 0, bytesRead);
-                        totalBytesWritten += bytesRead;
+                        totalBytesSent += bytesRead;
                         if (callback != null) {
-                            callback.onSendingProgress(file, (float) totalBytesWritten / (float) file.length());
+                            Progress progress = new Progress(files.get(i), totalBytesSent, totalBytes, i, files.size());
+                            long fileDurationSoFar = System.currentTimeMillis() - startTimeFile;
+                            progress.bitsPerSecondEstimation = totalBytesSent * 8f / (fileDurationSoFar / 1000f);
+                            callback.onSendingProgress(progress);
                         }
                     }
                     dos.flush();
+                    i++;
                 }
                 System.out.println(file.getName() + " sending finished successfully.");
                 if (callback != null) callback.onFinished(file, receiver);
