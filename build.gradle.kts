@@ -1,18 +1,14 @@
 plugins {
     application
     id("org.openjfx.javafxplugin") version "0.0.13"
+    id("org.beryx.jlink") version "3.1.1"
 }
 
 repositories {
     mavenCentral()
 }
 
-val javafxVersion = "21" // or 17 if using LTS
-
-dependencies {
-    implementation("org.openjfx:javafx-controls:$javafxVersion")
-    implementation("org.openjfx:javafx-fxml:$javafxVersion")
-}
+val javafxVersion = "21"
 
 javafx {
     version = javafxVersion
@@ -20,5 +16,20 @@ javafx {
 }
 
 application {
-    mainClass.set("org.deg.ui.NetworkTransferUI") // Replace with your main class
+    mainModule.set("localdrop")
+    mainClass.set("org.deg.ui.NetworkTransferUI")
+}
+
+jlink {
+    imageName.set("NetworkTransferUI")
+
+    launcher {
+        name = "network-transfer-ui"
+    }
+
+    jpackage {
+        installerName = "NetworkTransferInstaller"
+        appVersion = "1.0.0"
+        // installerType = "exe" // Uncomment and set according to your platform
+    }
 }
