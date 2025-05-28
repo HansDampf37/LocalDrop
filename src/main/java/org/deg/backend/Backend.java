@@ -95,7 +95,7 @@ public class Backend {
     }
 
     /**
-     * Sends all files over a tcp connection to the receiver
+     * Sends all files over a tcp connection to the receiver. The files can be files and directories.
      * @param sender the sending peer
      * @param receiver the receiving peer
      * @param filesToSend the list of files to send

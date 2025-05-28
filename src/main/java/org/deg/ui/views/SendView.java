@@ -176,7 +176,7 @@ public class SendView extends VBox {
                 }
             }
         });
-        peerList.setSelectionModel(null); // make elements unclickable
+        peerList.setSelectionModel(null); // make elements non-clickable
         discoverPeers();
         peerList.disableProperty().bind(Bindings.isEmpty(filesToSend));
         return peerList;
@@ -186,6 +186,5 @@ public class SendView extends VBox {
         peers.clear();
         peers.addAll(backend.discoverPeers());
         peers.addAll(manuallyAddedPeers);
-        peers.add(new Peer("Alice", "192.168.178.49", (int)(Math.random() * 64000)));
     }
 }

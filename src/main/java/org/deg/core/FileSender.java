@@ -1,5 +1,6 @@
 package org.deg.core;
 
+import org.deg.backend.FileExpander;
 import org.deg.core.callbacks.FileSendingEventHandler;
 
 import java.io.*;
@@ -16,19 +17,21 @@ public class FileSender {
     private final List<File> files;
 
     /**
-     * Constructs a FileSender for a specific file and target peer.
-     * @param sender The sending peer.
+     * Constructs a FileSender for a set of files and target peer.
+     *
+     * @param sender   The sending peer.
      * @param receiver The receiving peer.
-     * @param files The files to send.
+     * @param files    The files to send.
      */
     public FileSender(Peer sender, Peer receiver, List<File> files) {
-        this.files = files;
+        this.files = FileExpander.expandFiles(files);
         this.sender = sender;
         this.receiver = receiver;
     }
 
     /**
      * Initiates the file transfer to the specified peer.
+     *
      * @param callback the callback is called whenever new bytes are sent (can be null)
      */
     public void send(FileSendingEventHandler callback) throws SendingDeniedException {
