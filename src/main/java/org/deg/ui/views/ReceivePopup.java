@@ -1,5 +1,6 @@
 package org.deg.ui.views;
 
+import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -17,13 +18,15 @@ import javafx.stage.Stage;
 import org.deg.core.Peer;
 
 import java.io.File;
+import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class ReceivePopup extends Stage {
     private final ProgressBar progressBar = new ProgressBar();
     private boolean receivingFilesOngoing = false;
 
-    public ReceivePopup(File file, Peer sender, Consumer<Boolean> onDecision) {
+    public ReceivePopup(List<File> files, Peer sender, Consumer<Boolean> onDecision) {
         super();
         initModality(Modality.APPLICATION_MODAL);
         setTitle("Data received by " + sender.name());
@@ -41,7 +44,7 @@ public class ReceivePopup extends Stage {
         Circle clip = new Circle(100, 100, 100);
         profilePic.setClip(clip);
         ListView<String> receivedFiles = new ListView<>();
-        receivedFiles.getItems().add(file.getName());
+        receivedFiles.setItems(FXCollections.observableList(files.stream().map(File::getName).collect(Collectors.toList())));
 
         HBox buttons = new HBox(10);
         Button abort = new Button("Abort");

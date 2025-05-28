@@ -1,21 +1,25 @@
 package org.deg.core;
 
+import java.util.List;
+
 /**
- * A simple data class to store file metadata.
+ * A simple data class to store metadata about sending files.
  */
 public class Metadata {
-    public String fileName;
-    public long fileSize;
+    public int fileCount;
+    public List<String> fileNames;
+    public List<Long> fileSizes;
     public Peer sender;
 
     /**
      * Constructs a metadata object for a file.
-     * @param fileName The name of the file.
-     * @param fileSize The size of the file in bytes.
+     * @param fileNames The name of the file.
+     * @param fileSizes The size of the file in bytes.
      */
-    public Metadata(String fileName, long fileSize, Peer sender) {
-        this.fileName = fileName;
-        this.fileSize = fileSize;
+    public Metadata(int fileCount, List<String> fileNames, List<Long> fileSizes, Peer sender) {
+        this.fileCount = fileCount;
+        this.fileNames = fileNames;
+        this.fileSizes = fileSizes;
         this.sender = sender;
     }
 }

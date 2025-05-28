@@ -95,19 +95,20 @@ public class Backend {
     }
 
     /**
-     * Sends a file to another peer
+     * Sends all files over a tcp connection to the receiver
      * @param sender the sending peer
      * @param receiver the receiving peer
-     * @param file the file
+     * @param filesToSend the list of files to send
+     * @param handler the handler for sending events
      */
-    public void startFileTransfer(Peer sender, Peer receiver, File file, FileSendingEventHandler callback) {
+    public void startFilesTransfer(Peer sender, Peer receiver, List<File> filesToSend, FileSendingEventHandler handler) {
         executor.submit(() -> {
             try {
-                new FileSender(sender, receiver, file).send(callback);
+                new FileSender(sender, receiver, filesToSend).send(handler);
             } catch (SendingDeniedException e) {
                 System.out.println("Sending denied");
             }
-            sentLog.add(new Pair<>(receiver, file));
+            for (File file : filesToSend) sentLog.add(new Pair<>(receiver, file));
         });
     }
 
@@ -119,17 +120,6 @@ public class Backend {
      */
     public void setFileReceivedHandler(FileReceivingEventHandler handler) {
         fileReceiver.setEventHandler(handler);
-    }
-
-    /**
-     * Sends all files over a tcp connection to the receiver
-     * @param sender the sending peer
-     * @param receiver the receiving peer
-     * @param filesToSend the list of files to send
-     * @param handler the handler for sending events
-     */
-    public void startFilesTransfer(Peer sender, Peer receiver, List<File> filesToSend, FileSendingEventHandler handler) {
-        startFileTransfer(sender, receiver, filesToSend.getFirst(), handler);
     }
 
     public List<Pair<Peer, File>> getSentLog() {

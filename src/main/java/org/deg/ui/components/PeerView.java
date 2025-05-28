@@ -1,8 +1,11 @@
 package org.deg.ui.components;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -10,11 +13,11 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import org.deg.core.Peer;
-import javafx.scene.control.ProgressBar;
 
 public class PeerView extends HBox {
     private boolean transmittingFilesOngoing = false;
     private final ProgressBar progressBar = new ProgressBar();
+    private final SimpleIntegerProperty filesSentCounter = new SimpleIntegerProperty(0);
 
     public PeerView(Peer peer) {
         setPadding(new Insets(10));
@@ -35,6 +38,8 @@ public class PeerView extends HBox {
 
         VBox gap = new VBox();
         HBox.setHgrow(gap, Priority.ALWAYS);
+        Label fileCounterLabel = new Label();
+        fileCounterLabel.textProperty().bind(Bindings.convert(filesSentCounter));
         progressBar.setProgress(0);
         progressBar.setVisible(false);
         progressBar.setPrefWidth(200);
@@ -62,4 +67,7 @@ public class PeerView extends HBox {
         progressBar.setVisible(false);
     }
 
+    public void increaseFileCounter() {
+        filesSentCounter.set(filesSentCounter.get() + 1);
+    }
 }

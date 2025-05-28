@@ -6,6 +6,7 @@ import org.deg.core.callbacks.FileReceivingEventHandler;
 import org.deg.ui.views.ReceivePopup;
 
 import java.io.File;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -13,11 +14,11 @@ public class FileReceivingHandler implements FileReceivingEventHandler {
     private ReceivePopup receivePopup = null;
 
     @Override
-    public boolean onIncomingFile(File file, Peer sender) {
+    public boolean onIncomingFile(List<File> files, Peer sender) {
         CompletableFuture<Boolean> userResponse = new CompletableFuture<>();
 
         Platform.runLater(() -> {
-            ReceivePopup popup = new ReceivePopup(file, sender, userResponse::complete);
+            ReceivePopup popup = new ReceivePopup(files, sender, userResponse::complete);
             this.receivePopup = popup;
             popup.show();
         });
@@ -36,18 +37,22 @@ public class FileReceivingHandler implements FileReceivingEventHandler {
     }
 
     @Override
-    public void onReceivingProgress(float progress) {
+    public void onReceivingProgress(File file, float progress) {
         if (receivePopup != null) {
-            receivePopup.onReceivingProgress(progress);
+            receivePopup.onReceivingProgress(progress); // TODO
         }
     }
 
     @Override
     public void onReceivingFinished(File file, Peer sender) {
+        // TODO
+    }
+
+    @Override
+    public void onReceivingFinished(Peer sender) {
         if (receivePopup != null) {
             Platform.runLater(() -> receivePopup.close());
         }
-
     }
 
     @Override

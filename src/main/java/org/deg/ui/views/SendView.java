@@ -153,14 +153,15 @@ public class SendView extends VBox {
                     PeerView peerView = new PeerView(peer);
                     FileSendingEventHandler callback = new FileSendingEventHandler() {
                         @Override
-                        public void onSendingProgress(float progress) {
+                        public void onSendingProgress(File file, float progress) {
                             peerView.setProgress(progress);
                         }
 
                         @Override
-                        public void onFinished(File file, Peer receiver) {
-                            peerView.onTransmissionStop();
-                        }
+                        public void onFinished(File file, Peer receiver) { peerView.increaseFileCounter(); }
+
+                        @Override
+                        public void onFinished(Peer receiver) { peerView.onTransmissionStop(); }
 
                         @Override
                         public void onSendingFailed(Exception e) {
