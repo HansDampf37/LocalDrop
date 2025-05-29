@@ -23,6 +23,10 @@ public record Peer(String name, String ip, int fileTransferPort) {
         return "RESPONSE|" + name + "|" + ip + "|" + fileTransferPort;
     }
 
+    public String toHelloMessage() {
+        return "HELLO|" + name + "|" + ip + "|" + fileTransferPort;
+    }
+
     /**
      * Static factory method to create a Peer from a discovery response string.
      *

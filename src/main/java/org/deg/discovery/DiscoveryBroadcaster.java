@@ -47,7 +47,7 @@ public class DiscoveryBroadcaster {
                     socket.receive(response);
 
                     String message = new String(response.getData(), 0, response.getLength());
-                    if (message.startsWith("RESPONSE|")) { // TODO add hello message on start
+                    if (message.startsWith("RESPONSE|") || message.startsWith("HELLO|")) {
                         Peer peer = Peer.fromDiscoveryResponse(message);
                         if (peer != null && !isSelf(peer, localPeer)) {
                             peers.add(peer);

@@ -9,9 +9,9 @@ import java.net.InetAddress;
 
 /**
  * Listens for UDP broadcast discovery requests and responds with peer info.
+ * On start also sends a hello udp broadcast into the network
  */
 public class DiscoveryListener implements Runnable {
-
     private boolean running = false;
     private static final int DISCOVERY_PORT = 8888;
     private final Peer peer;
@@ -22,10 +22,15 @@ public class DiscoveryListener implements Runnable {
 
     @Override
     public void run() {
+        sendHelloMessage();
+        answerToIncomingDiscoveryRequests();
+    }
+
+    private void answerToIncomingDiscoveryRequests() {
         try (DatagramSocket socket = new DatagramSocket(DISCOVERY_PORT, InetAddress.getByName("0.0.0.0"))) {
             socket.setBroadcast(true);
-            byte[] buffer = new byte[1024];
 
+            byte[] buffer = new byte[1024];
             running = true;
             while (running) {
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
@@ -45,6 +50,20 @@ public class DiscoveryListener implements Runnable {
             }
         } catch (IOException e) {
             System.err.println("Discovery listener error: " + e.getMessage());
+        }
+    }
+
+    private void sendHelloMessage() {
+        try (DatagramSocket socket = new DatagramSocket(DISCOVERY_PORT, InetAddress.getByName("0.0.0.0"))) {
+            socket.setBroadcast(true);
+            byte[] requestData = peer.toHelloMessage().getBytes();
+            DatagramPacket packet = new DatagramPacket(
+                    requestData, requestData.length,
+                    InetAddress.getByName("255.255.255.255"), DISCOVERY_PORT
+            );
+            socket.send(packet);
+        } catch (IOException e) {
+            System.err.println("Hello message could not be sent: " + e.getMessage());
         }
     }
 
