@@ -105,9 +105,7 @@ public class SendView extends VBox {
                 filesToSend.add(selectedDir);
             }
         });
-        btnClear.setOnAction(e -> {
-            filesToSend.clear();
-        });
+        btnClear.setOnAction(e -> filesToSend.clear());
 
         fileButtons.getChildren().addAll(btnAddFile, btnAddFolder, btnClear);
 

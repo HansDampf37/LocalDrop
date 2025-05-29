@@ -64,6 +64,6 @@ public class DiscoveryBroadcaster {
     }
 
     private boolean isSelf(Peer discovered, Peer local) {
-        return false && discovered.ip().equals(local.ip()) && discovered.fileTransferPort() == local.fileTransferPort();
+        return discovered.ip().equals(local.ip()) && discovered.fileTransferPort() == local.fileTransferPort();
     }
 }

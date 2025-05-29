@@ -43,8 +43,8 @@ public class FileSender {
             System.out.println("Send transmission request to " + receiver.name());
             Metadata metadata = new Metadata(
                     files.size(),
-                    files.stream().map((FileWithRelativePath f) -> f.relativePath).toList(),
-                    files.stream().map((FileWithRelativePath f) -> f.file.length()).toList(),
+                    files.stream().map(FileWithRelativePath::relativePath).toList(),
+                    files.stream().map((FileWithRelativePath f) -> f.file().length()).toList(),
                     sender
             );
             String metadataStr = MetadataHandler.buildMetadata(metadata);
@@ -68,8 +68,8 @@ public class FileSender {
             int i = 0;
             int totalBytesSent = 0;
             long startTime = System.currentTimeMillis();
-            long totalBytes = files.stream().mapToLong(f -> f.file.length()).sum();
-            for (File file : files.stream().map((FileWithRelativePath f) -> f.file).toList()) {
+            long totalBytes = files.stream().mapToLong(f -> f.file().length()).sum();
+            for (File file : files.stream().map(FileWithRelativePath::file).toList()) {
                 try (FileInputStream fis = new FileInputStream(file)) {
                     byte[] buffer = new byte[4096];
                     int bytesRead;

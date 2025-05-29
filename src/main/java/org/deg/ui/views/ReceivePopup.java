@@ -50,9 +50,9 @@ public class ReceivePopup extends Stage {
         profilePic.setClip(clip);
 
         ListView<String> receivedFiles = new ListView<>();
-        receivedFiles.setItems(FXCollections.observableList(files.stream().map((FileWithRelativePath f) -> f.relativePath).collect(Collectors.toList())));
+        receivedFiles.setItems(FXCollections.observableList(files.stream().map(FileWithRelativePath::relativePath).collect(Collectors.toList())));
         int numberOfFiles = files.size();
-        long numberOfBytes = files.stream().mapToLong((FileWithRelativePath f) -> f.file.length()).sum();
+        long numberOfBytes = files.stream().mapToLong((FileWithRelativePath f) -> f.file().length()).sum();
         Label details = new Label(numberOfFiles + " files, " + Utils.bytesToReadableString(numberOfBytes));
 
         HBox.setHgrow(progressBar, Priority.ALWAYS);

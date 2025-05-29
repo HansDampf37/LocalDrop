@@ -2,6 +2,7 @@ module localdrop {
     requires javafx.controls;
     requires javafx.fxml;
     requires java.sql;
+    requires java.desktop;
 
     exports org.deg.ui;
     exports org.deg.backend;
