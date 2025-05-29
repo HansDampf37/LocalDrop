@@ -1,4 +1,4 @@
-package org.deg;
+package org.deg.core;
 
 public class Settings {
     public static final int DISCOVERY_PORT = 8888;

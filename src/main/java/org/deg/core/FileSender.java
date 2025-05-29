@@ -8,7 +8,7 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static org.deg.Settings.ACCEPT_TRANSMISSION_REQUEST;
+import static org.deg.core.Settings.ACCEPT_TRANSMISSION_REQUEST;
 
 /**
  * The FileSender class connects to a remote peer and sends files,

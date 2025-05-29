@@ -11,8 +11,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.deg.Settings.ACCEPT_TRANSMISSION_REQUEST;
-import static org.deg.Settings.DENY_TRANSMISSION_REQUEST;
+import static org.deg.core.Settings.ACCEPT_TRANSMISSION_REQUEST;
+import static org.deg.core.Settings.DENY_TRANSMISSION_REQUEST;
 
 /**
  * The FileReceiver class listens on a given port for incoming file transfer requests,

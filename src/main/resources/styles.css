@@ -9,8 +9,19 @@
     -fx-padding: 10px;
     -fx-font-size: 14px;
 }
+.nav-button-small {
+    -fx-background-color: #d9f2d9;
+    -fx-border-color: #cccccc;
+    -fx-border-width: 1 1 1 1;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-max-height: 30px;
+    -fx-max-width: 30px;
+    -fx-min-width: 30px;
+    -fx-min-height: 30px;
+}
 
-.nav-button:hover {
+.nav-button:hover, .nav-button-small:hover {
     -fx-background-color: #c0e7c0;
 }
 

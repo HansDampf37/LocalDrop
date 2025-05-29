@@ -5,29 +5,14 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.deg.core.Peer;
+import org.deg.ui.components.TextFieldWithName;
 
 import java.util.List;
-
-class TextFieldWithName extends VBox {
-
-    final TextField inputField;
-
-    public TextFieldWithName(String name) {
-        inputField = new TextField();
-        getChildren().addAll(new Label(name), inputField);
-    }
-
-    public String getText() {
-        return inputField.getText();
-    }
-}
 
 public class AddPeerManually extends Stage {
     private final List<Peer> listToAddTo;

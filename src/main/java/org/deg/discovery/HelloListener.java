@@ -8,7 +8,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.function.Consumer;
 
-import static org.deg.Settings.*;
+import static org.deg.core.Settings.*;
 
 /**
  * Listens for UDP broadcast hello requests.

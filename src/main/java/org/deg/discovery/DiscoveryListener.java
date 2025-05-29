@@ -7,8 +7,8 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
-import static org.deg.Settings.DISCOVERY_PORT;
-import static org.deg.Settings.DISCOVERY_REQUEST;
+import static org.deg.core.Settings.DISCOVERY_PORT;
+import static org.deg.core.Settings.DISCOVERY_REQUEST;
 
 /**
  * Listens for UDP broadcast discovery requests and responds with peer info.
