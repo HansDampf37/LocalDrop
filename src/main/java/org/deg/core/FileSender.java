@@ -67,10 +67,10 @@ public class FileSender {
             // Step 3: Send file content
             int i = 0;
             int totalBytesSent = 0;
+            long startTime = System.currentTimeMillis();
             long totalBytes = files.stream().mapToLong(f -> f.file.length()).sum();
             for (File file : files.stream().map((FileWithRelativePath f) -> f.file).toList()) {
                 try (FileInputStream fis = new FileInputStream(file)) {
-                    long startTimeFile = System.currentTimeMillis();
                     byte[] buffer = new byte[4096];
                     int bytesRead;
                     while ((bytesRead = fis.read(buffer)) != -1) {
@@ -78,10 +78,10 @@ public class FileSender {
                         totalBytesSent += bytesRead;
                         if (callback != null) {
                             Progress progress = new Progress(files.get(i), totalBytesSent, totalBytes, i, files.size());
-                            long fileDurationSoFar = System.currentTimeMillis() - startTimeFile;
+                            long durationSoFar = System.currentTimeMillis() - startTime;
                             long totalMegaBytesSent = totalBytesSent / 1000000;
                             long totalMegaBitsSent = totalMegaBytesSent * 8;
-                            long totalTimeInSeconds = fileDurationSoFar / 1000;
+                            long totalTimeInSeconds = durationSoFar / 1000;
                             progress.megaBitsPerSecondEstimation = totalMegaBitsSent / (float) totalTimeInSeconds;
                             callback.onSendingProgress(progress);
                         }
