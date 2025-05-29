@@ -48,16 +48,17 @@ public class NetworkTransferUI extends Application {
             System.exit(0);
         });
 
-        BorderPane root = new BorderPane();
+        BorderPane borderPane = new BorderPane();
         VBox navBar = createNavBar();
-        root.setLeft(navBar);
+        borderPane.setLeft(navBar);
 
         mainContent = new StackPane();
         receiveView = new ReceiveView(backend.localPeer);
-        sendView = new SendView(backend);
+        sendView = new SendView(backend, primaryStage);
         loadSendPage();
 
-        root.setCenter(mainContent);
+        borderPane.setCenter(mainContent);
+        StackPane root = new StackPane(borderPane);
 
         Scene scene = new Scene(root, 800, 600);
         scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/styles.css")).toExternalForm());

@@ -14,12 +14,15 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.deg.backend.Backend;
 import org.deg.core.Peer;
 import org.deg.core.callbacks.FileSendingEventHandler;
 import org.deg.core.callbacks.Progress;
 import org.deg.ui.components.PeerView;
+import org.deg.ui.components.Toast;
+import org.deg.ui.components.ToastMode;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -36,10 +39,12 @@ public class SendView extends VBox {
     private final Backend backend;
     private final RotateTransition rotate;
     private final ImageView reloadIcon;
+    private final Stage mainStage;
 
-    public SendView(Backend backend) {
+    public SendView(Backend backend, Stage mainStage) {
         super(15);
         this.backend = backend;
+        this.mainStage = mainStage;
 
         setPadding(new Insets(15));
 
@@ -177,22 +182,26 @@ public class SendView extends VBox {
                         @Override
                         public void onFinished(Peer receiver) {
                             Platform.runLater(peerView::onTransmissionStop);
+                            String message = "Transmission to " + receiver.name() + " is complete";
+                            Toast.show(mainStage, message, 3000, ToastMode.SUCCESS);
                         }
 
                         @Override
                         public void onDenied(Peer receiver) {
                             Platform.runLater(peerView::onTransmissionRejected);
+                            String message = "Transmission was denied by " + receiver.name();
+                            Toast.show(mainStage, message, 3000, ToastMode.INFO);
                         }
 
                         @Override
                         public void onAccepted(Peer receiver) {
                             Platform.runLater(peerView::onTransmissionStart);
-                            // TODO
                         }
 
                         @Override
                         public void onSendingFailed(Exception e) {
-                            e.printStackTrace();
+                            Platform.runLater(peerView::onTransmissionStop);
+                            Toast.show(mainStage, e.getMessage(), 3000, ToastMode.ERROR);
                         }
                     };
                     peerView.setOnMouseClicked(e -> {
@@ -211,12 +220,10 @@ public class SendView extends VBox {
 
     private void discoverPeers() {
         executor.submit(() -> {
-            Platform.runLater(() -> {
-                rotate.play();
-                peers.clear();
-            });
+            Platform.runLater(rotate::play);
             List<Peer> discoveredPeers = backend.discoverPeers();
             Platform.runLater(() -> {
+                peers.clear();
                 peers.addAll(discoveredPeers);
                 peers.addAll(manuallyAddedPeers);
                 rotate.stop();
