@@ -1,7 +1,6 @@
 package org.deg.core;
 
-import static org.deg.Settings.DISCOVERY_RESPONSE;
-import static org.deg.Settings.HELLO;
+import static org.deg.Settings.*;
 
 /**
  * Represents a peer in the LAN with a unique name and file transfer port.
@@ -26,8 +25,22 @@ public record Peer(String name, String ip, int fileTransferPort) {
         return DISCOVERY_RESPONSE + "|" + name + "|" + ip + "|" + fileTransferPort;
     }
 
+    /**
+     * Generates a hello message string for this peer.
+     *
+     * @return A string in the format "HELLO|name|ip|fileTransferPort".
+     */
     public String toHelloMessage() {
         return HELLO + "|" + name + "|" + ip + "|" + fileTransferPort;
+    }
+
+    /**
+     * Generates a bye message string for this peer.
+     *
+     * @return A string in the format "BYE|name|ip|fileTransferPort".
+     */
+    public String toByeMessage() {
+        return BYE + "|" + name + "|" + ip + "|" + fileTransferPort;
     }
 
     /**
@@ -55,6 +68,16 @@ public record Peer(String name, String ip, int fileTransferPort) {
      */
     public static Peer fromHelloMessage(String message) {
         return fromDiscoveryResponse(message);
+    }
+
+    /**
+     * Static factory method to create a Peer from a bye message string.
+     *
+     * @param message The bye message.
+     * @return A Peer object parsed from the message.
+     */
+    public static Peer fromByeMessage(String message) {
+        return fromHelloMessage(message);
     }
 
     @Override

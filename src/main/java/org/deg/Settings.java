@@ -8,4 +8,5 @@ public class Settings {
     public static final String DENY_TRANSMISSION_REQUEST = "DENY_TRANSMISSION";
     public static final int HELLO_PORT = 8889;
     public static final String HELLO = "HELLO";
+    public static final String BYE = "BYE";
 }

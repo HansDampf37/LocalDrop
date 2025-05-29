@@ -18,15 +18,17 @@ public class HelloListener implements Runnable {
     private boolean running = false;
     private final Peer localPeer;
     private Consumer<Peer> onNewPeer;
+    private Consumer<Peer> onPeerDisconnected;
 
-    public HelloListener(Peer peer, Consumer<Peer> onNewPeerCallback) {
+    public HelloListener(Peer peer, Consumer<Peer> onNewPeerCallback, Consumer<Peer> onPeerDisconnectedCallback) {
         this.localPeer = peer;
         onNewPeer = onNewPeerCallback;
+        onPeerDisconnected = onPeerDisconnectedCallback;
     }
 
     @Override
     public void run() {
-        sendHelloMessage();
+        sendMessage(true);
         listenToIncomingHelloMessages();
     }
 
@@ -46,6 +48,11 @@ public class HelloListener implements Runnable {
                     if (peer != null && !peer.equals(localPeer) && onNewPeer != null) {
                         onNewPeer.accept(peer);
                     }
+                } else if (message.startsWith(BYE)) {
+                    Peer peer = Peer.fromByeMessage(message);
+                    if (peer != null && !peer.equals(localPeer) && onPeerDisconnected != null) {
+                        onPeerDisconnected.accept(peer);
+                    }
                 }
             }
         } catch (IOException e) {
@@ -53,10 +60,10 @@ public class HelloListener implements Runnable {
         }
     }
 
-    private void sendHelloMessage() {
+    private void sendMessage(boolean hello) {
         try (DatagramSocket socket = new DatagramSocket(HELLO_PORT, InetAddress.getByName("0.0.0.0"))) {
             socket.setBroadcast(true);
-            byte[] requestData = localPeer.toHelloMessage().getBytes();
+            byte[] requestData = (hello ? localPeer.toHelloMessage() : localPeer.toByeMessage()).getBytes();
             DatagramPacket packet = new DatagramPacket(
                     requestData, requestData.length,
                     InetAddress.getByName("255.255.255.255"), HELLO_PORT
@@ -69,10 +76,15 @@ public class HelloListener implements Runnable {
 
     public void stop() {
         running = false;
+        sendMessage(false);
     }
 
     public void setOnNewPeerCallback(Consumer<Peer> onNewPeer) {
         this.onNewPeer = onNewPeer;
+    }
+
+    public void setOnPeerDisconnectedCallback(Consumer<Peer> onPeerDisconnected) {
+        this.onPeerDisconnected = onPeerDisconnected;
     }
 }
 

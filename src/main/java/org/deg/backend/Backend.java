@@ -45,7 +45,7 @@ public class Backend {
         localPeer = new Peer(peerName, localIp, fileTransferPort);
         fileReceiver = new FileReceiver(fileTransferPort, UserConfigurations.DEFAULT_SAFE_PATH);
         discoveryListener = new DiscoveryListener(localPeer);
-        helloListener = new HelloListener(localPeer, null);
+        helloListener = new HelloListener(localPeer, null, null);
     }
 
     /**
@@ -136,6 +136,14 @@ public class Backend {
      */
     public void setOnNewPeerCallback(Consumer<Peer> onNewPeer) {
         this.helloListener.setOnNewPeerCallback(onNewPeer);
+    }
+
+    /**
+     * Adds a callback that is called whenever a new peer sends a bye message.
+     * @param onPeerDisconnected the callback
+     */
+    public void setOnPeerDisconnectedCallback(Consumer<Peer> onPeerDisconnected) {
+        this.helloListener.setOnPeerDisconnectedCallback(onPeerDisconnected);
     }
 
     public List<Pair<Peer, File>> getSentLog() {

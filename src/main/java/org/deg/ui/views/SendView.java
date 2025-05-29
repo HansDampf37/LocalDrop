@@ -42,11 +42,8 @@ public class SendView extends VBox {
     public SendView(Backend backend, Stage mainStage) {
         super(15);
         this.backend = backend;
-        backend.setOnNewPeerCallback((Peer peer) -> {
-            Platform.runLater(() -> {
-                peers.add(peer);
-            });
-        });
+        backend.setOnNewPeerCallback((Peer peer) -> Platform.runLater(() -> peers.add(peer)));
+        backend.setOnPeerDisconnectedCallback((Peer peer) -> Platform.runLater(() -> peers.remove(peer)));
 
         this.mainStage = mainStage;
         setPadding(new Insets(15));
