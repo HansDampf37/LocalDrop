@@ -41,7 +41,7 @@ public class HelloListener implements Runnable {
                 socket.receive(packet);
 
                 String message = new String(packet.getData(), 0, packet.getLength());
-                if (message.equals(HELLO)) {
+                if (message.startsWith(HELLO)) {
                     Peer peer = Peer.fromHelloMessage(message);
                     if (peer != null && !peer.equals(localPeer)) {
                         onNewPeer.accept(peer);
