@@ -16,8 +16,8 @@ import static org.deg.Settings.*;
  */
 public class HelloListener implements Runnable {
     private boolean running = false;
-    private final Consumer<Peer> onNewPeer;
     private final Peer localPeer;
+    private Consumer<Peer> onNewPeer;
 
     public HelloListener(Peer peer, Consumer<Peer> onNewPeerCallback) {
         this.localPeer = peer;
@@ -43,7 +43,7 @@ public class HelloListener implements Runnable {
                 String message = new String(packet.getData(), 0, packet.getLength());
                 if (message.startsWith(HELLO)) {
                     Peer peer = Peer.fromHelloMessage(message);
-                    if (peer != null && !peer.equals(localPeer)) {
+                    if (peer != null && !peer.equals(localPeer) && onNewPeer != null) {
                         onNewPeer.accept(peer);
                     }
                 }
@@ -69,6 +69,10 @@ public class HelloListener implements Runnable {
 
     public void stop() {
         running = false;
+    }
+
+    public void setOnNewPeerCallback(Consumer<Peer> onNewPeer) {
+        this.onNewPeer = onNewPeer;
     }
 }
 

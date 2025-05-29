@@ -42,8 +42,13 @@ public class SendView extends VBox {
     public SendView(Backend backend, Stage mainStage) {
         super(15);
         this.backend = backend;
-        this.mainStage = mainStage;
+        backend.setOnNewPeerCallback((Peer peer) -> {
+            Platform.runLater(() -> {
+                peers.add(peer);
+            });
+        });
 
+        this.mainStage = mainStage;
         setPadding(new Insets(15));
 
         Label dataLabel = new Label("Data");

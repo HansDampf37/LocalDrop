@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
 /**
  * Handles backend operations for LAN file sharing, including peer initialization,
@@ -44,9 +45,7 @@ public class Backend {
         localPeer = new Peer(peerName, localIp, fileTransferPort);
         fileReceiver = new FileReceiver(fileTransferPort, UserConfigurations.DEFAULT_SAFE_PATH);
         discoveryListener = new DiscoveryListener(localPeer);
-        helloListener = new HelloListener(localPeer, (Peer p) -> {
-            System.out.println("New peer joined network " + p.name()); //TODO
-        });
+        helloListener = new HelloListener(localPeer, null);
     }
 
     /**
@@ -64,7 +63,7 @@ public class Backend {
     }
 
     /**
-     * Stops the backend gracefully. Currently, threads are daemonized and terminate with the app.
+     * Stops the backend gracefully. (Not really)
      */
     public void stop() {
         fileReceiver.stop();
@@ -129,6 +128,14 @@ public class Backend {
      */
     public void setFileReceivedHandler(FileReceivingEventHandler handler) {
         fileReceiver.setEventHandler(handler);
+    }
+
+    /**
+     * Adds a callback that is called whenever a new peer is discovered using the hello protocol.
+     * @param onNewPeer the callback
+     */
+    public void setOnNewPeerCallback(Consumer<Peer> onNewPeer) {
+        this.helloListener.setOnNewPeerCallback(onNewPeer);
     }
 
     public List<Pair<Peer, File>> getSentLog() {
