@@ -79,10 +79,8 @@ public class FileSender {
                         if (callback != null) {
                             Progress progress = new Progress(files.get(i), totalBytesSent, totalBytes, i, files.size());
                             long durationSoFar = System.currentTimeMillis() - startTime;
-                            long totalMegaBytesSent = totalBytesSent / 1000000;
-                            long totalMegaBitsSent = totalMegaBytesSent * 8;
-                            long totalTimeInSeconds = durationSoFar / 1000;
-                            progress.megaBitsPerSecondEstimation = totalMegaBitsSent / (float) totalTimeInSeconds;
+                            float totalTimeInSeconds = durationSoFar / 1000f;
+                            progress.bitsPerSecondEstimation = (long)(totalBytesSent * 8L / totalTimeInSeconds);
                             callback.onSendingProgress(progress);
                         }
                     }

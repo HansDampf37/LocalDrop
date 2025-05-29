@@ -2,6 +2,7 @@ package org.deg.core;
 
 import javafx.util.Pair;
 import org.deg.core.callbacks.FileReceivingEventHandler;
+import org.deg.core.callbacks.Progress;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -67,6 +68,9 @@ public class FileReceiver implements Runnable {
 
                 // Step 3: Receive transmission
                 System.out.println("Start receiving of files " + outputFiles.stream().map((FileWithRelativePath f) -> f.file.getName()).toList());
+                int totalBytesReceived = 0;
+                long startTime = System.currentTimeMillis();
+                long totalBytes = outputFiles.stream().mapToLong(f -> f.file.length()).sum();
                 for (int i = 0; i < outputFiles.size(); i++) {
                     long fileSize = metadata.fileSizes.get(i);
                     FileWithRelativePath outputFile = outputFiles.get(i);
@@ -77,13 +81,22 @@ public class FileReceiver implements Runnable {
                         byte[] buffer = new byte[4096];
                         long remaining = fileSize;
                         int bytesRead;
-                        int totalBytesRead = 0;
                         while (remaining > 0 && (bytesRead = dis.read(buffer, 0, (int) Math.min(buffer.length, remaining))) != -1) {
                             fos.write(buffer, 0, bytesRead);
                             remaining -= bytesRead;
-                            totalBytesRead += bytesRead;
+                            totalBytesReceived += bytesRead;
                             if (callback != null) {
-                                callback.onReceivingProgress(outputFile, (float) totalBytesRead / fileSize);
+                                Progress progress = new Progress(
+                                        outputFile,
+                                        totalBytesReceived,
+                                        totalBytes,
+                                        i,
+                                        outputFiles.size()
+                                );
+                                long durationSoFar = System.currentTimeMillis() - startTime;
+                                float totalTimeInSeconds = durationSoFar / 1000f;
+                                progress.bitsPerSecondEstimation = (long)(totalBytesReceived * 8L / totalTimeInSeconds);
+                                callback.onReceivingProgress(progress);
                             }
                         }
                     }

@@ -29,7 +29,7 @@ public class Progress {
     /**
      * An estimation of the current transmission speed
      */
-    public float megaBitsPerSecondEstimation;
+    public long bitsPerSecondEstimation;
 
     public Progress(FileWithRelativePath file, long bytesTransmitted, long totalBytes, int filesTransmitted, int totalFiles) {
         this.currentFile = file;
@@ -37,7 +37,7 @@ public class Progress {
         this.totalBytes = totalBytes;
         this.filesTransmitted = filesTransmitted;
         this.totalFiles = totalFiles;
-        this.megaBitsPerSecondEstimation = 0;
+        this.bitsPerSecondEstimation = 0;
     }
 
     public float totalProgress() {

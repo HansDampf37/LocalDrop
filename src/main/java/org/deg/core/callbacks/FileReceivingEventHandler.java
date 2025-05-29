@@ -19,10 +19,10 @@ public interface FileReceivingEventHandler {
     boolean onIncomingFiles(List<FileWithRelativePath> files, Peer sender);
 
     /**
-     * Is called when new bytes of the file are received.
-     * @param progress The total progress between 0 and 1
+     * Is called when new bytes are received.
+     * @param progress The total progress
      */
-    void onReceivingProgress(FileWithRelativePath file, float progress);
+    void onReceivingProgress(Progress progress);
 
     /**
      * Is called when a file was successfully transmitted
@@ -38,7 +38,7 @@ public interface FileReceivingEventHandler {
     void onReceivingFinished(Peer sender);
 
     /**
-     * Is called whenever the transmission of the file failed
+     * Is called whenever the transmission failed
      * @param e the exception that caused the failure
      */
     void onReceivingFailed(Exception e);

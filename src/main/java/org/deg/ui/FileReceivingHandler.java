@@ -4,6 +4,7 @@ import javafx.application.Platform;
 import org.deg.core.FileWithRelativePath;
 import org.deg.core.Peer;
 import org.deg.core.callbacks.FileReceivingEventHandler;
+import org.deg.core.callbacks.Progress;
 import org.deg.ui.components.Toast;
 import org.deg.ui.components.ToastMode;
 import org.deg.ui.views.ReceivePopup;
@@ -39,7 +40,7 @@ public class FileReceivingHandler implements FileReceivingEventHandler {
     }
 
     @Override
-    public void onReceivingProgress(FileWithRelativePath file, float progress) {
+    public void onReceivingProgress(Progress progress) {
         if (receivePopup != null) {
             receivePopup.onReceivingProgress(progress);
         }

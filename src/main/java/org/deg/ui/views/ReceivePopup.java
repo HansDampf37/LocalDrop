@@ -18,8 +18,8 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.deg.core.FileWithRelativePath;
 import org.deg.core.Peer;
-import org.deg.ui.components.Toast;
-import org.deg.ui.components.ToastMode;
+import org.deg.core.callbacks.Progress;
+import org.deg.utils.Utils;
 
 import java.util.List;
 import java.util.Objects;
@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 
 public class ReceivePopup extends Stage {
     private final ProgressBar progressBar = new ProgressBar();
-    private boolean receivingFilesOngoing = false;
 
     public ReceivePopup(List<FileWithRelativePath> files, Peer sender, Consumer<Boolean> onDecision) {
         super();
@@ -53,19 +52,22 @@ public class ReceivePopup extends Stage {
         receivedFiles.setItems(FXCollections.observableList(files.stream().map((FileWithRelativePath f) -> f.relativePath).collect(Collectors.toList())));
         int numberOfFiles = files.size();
         long numberOfBytes = files.stream().mapToLong((FileWithRelativePath f) -> f.file.length()).sum();
-        Label details = new Label(numberOfFiles + " files, " + numberOfBytes + " bytes");
+        Label details = new Label(numberOfFiles + " files, " + Utils.bytesToReadableString(numberOfBytes));
+
+        progressBar.setProgress(0);
+        progressBar.setVisible(false);
+        progressBar.setPrefWidth(200);
+        progressBar.setPrefHeight(20);
 
         HBox buttons = new HBox(10);
-        Button test = new Button("Click Me");
         Button abort = new Button("Abort");
         Button save = new Button("Save to Downloads");
-        test.setOnMouseClicked(event -> {
-            Toast.show(this, "Test", 1000, ToastMode.WARNING);
-        });
         save.setOnMouseClicked(event -> {
-            receivingFilesOngoing = true;
             progressBar.setVisible(true);
-            onDecision.accept(true);
+            // Delay the decision callback just a bit to allow UI update
+            javafx.animation.PauseTransition delay = new javafx.animation.PauseTransition(javafx.util.Duration.millis(50));
+            delay.setOnFinished(e -> onDecision.accept(true));
+            delay.play();
         });
         abort.setOnMouseClicked(event -> onDecision.accept(false));
 
@@ -73,26 +75,19 @@ public class ReceivePopup extends Stage {
         save.setStyle("-fx-background-color: lightgreen;");
 
         buttons.setAlignment(Pos.CENTER_RIGHT);
-        buttons.getChildren().addAll(test, abort, save);
+        buttons.getChildren().addAll(progressBar, abort, save);
 
-        layout.getChildren().addAll(title, nameBox, profilePic, receivedFiles, details, progressBar, buttons);
+        layout.getChildren().addAll(title, nameBox, profilePic, receivedFiles, details, buttons);
 
         StackPane root = new StackPane();
         root.getChildren().add(layout);
-        Scene scene = new Scene(root, 600, 600);
+        Scene scene = new Scene(root, 700, 800);
         scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/styles.css")).toExternalForm());
-
-        progressBar.setProgress(0);
-        progressBar.setVisible(false);
-        progressBar.setPrefWidth(200);
 
         setScene(scene);
     }
 
-    public void onReceivingProgress(float progress) {
-        if (receivingFilesOngoing) {
-            progressBar.setVisible(true);
-            progressBar.setProgress(progress);
-        }
+    public void onReceivingProgress(Progress progress) {
+        progressBar.setProgress(progress.totalProgress());
     }
 }

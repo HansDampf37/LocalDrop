@@ -13,6 +13,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import org.deg.core.Peer;
 import org.deg.core.callbacks.Progress;
+import org.deg.utils.Utils;
 
 
 /**
@@ -77,7 +78,7 @@ public class PeerView extends HBox {
         if (state == PeerState.SENDING) {
             progressBar.setProgress(progress.totalProgress());
             filesSentCounterLabel.setText(progress.filesTransmitted + "/" + progress.totalFiles);
-            transmissionRateLabel.setText(progress.megaBitsPerSecondEstimation + " Mbit/s");
+            transmissionRateLabel.setText(Utils.bitsPerSecondToReadableString(progress.bitsPerSecondEstimation));
         }
     }
 
