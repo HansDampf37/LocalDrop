@@ -42,7 +42,7 @@ public class FileReceivingHandler implements FileReceivingEventHandler {
     @Override
     public void onReceivingProgress(Progress progress) {
         if (receivePopup != null) {
-            receivePopup.onReceivingProgress(progress);
+            Platform.runLater(() -> receivePopup.onReceivingProgress(progress));
         }
     }
 
@@ -52,13 +52,16 @@ public class FileReceivingHandler implements FileReceivingEventHandler {
     @Override
     public void onReceivingFinished(Peer sender) {
         if (receivePopup != null) {
-            Platform.runLater(() -> receivePopup.close());
+            Platform.runLater(() -> {
+                receivePopup.close();
+                receivePopup = null;
+            });
         }
     }
 
     @Override
     public void onReceivingFailed(Exception e) {
-        Toast.show(receivePopup, e.getMessage(), 3000, ToastMode.ERROR);
+        Platform.runLater(() -> Toast.show(receivePopup, e.getMessage(), 3000, ToastMode.ERROR));
         e.printStackTrace();
     }
 }

@@ -7,10 +7,10 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
-import javafx.scene.control.ProgressBar;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
@@ -19,6 +19,7 @@ import javafx.stage.Stage;
 import org.deg.core.FileWithRelativePath;
 import org.deg.core.Peer;
 import org.deg.core.callbacks.Progress;
+import org.deg.ui.components.FileSendingProgressBar;
 import org.deg.utils.Utils;
 
 import java.util.List;
@@ -27,7 +28,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class ReceivePopup extends Stage {
-    private final ProgressBar progressBar = new ProgressBar();
+    private final FileSendingProgressBar progressBar = new FileSendingProgressBar(false);
 
     public ReceivePopup(List<FileWithRelativePath> files, Peer sender, Consumer<Boolean> onDecision) {
         super();
@@ -54,16 +55,14 @@ public class ReceivePopup extends Stage {
         long numberOfBytes = files.stream().mapToLong((FileWithRelativePath f) -> f.file.length()).sum();
         Label details = new Label(numberOfFiles + " files, " + Utils.bytesToReadableString(numberOfBytes));
 
-        progressBar.setProgress(0);
+        HBox.setHgrow(progressBar, Priority.ALWAYS);
         progressBar.setVisible(false);
-        progressBar.setPrefWidth(200);
-        progressBar.setPrefHeight(20);
 
         HBox buttons = new HBox(10);
         Button abort = new Button("Abort");
         Button save = new Button("Save to Downloads");
         save.setOnMouseClicked(event -> {
-            progressBar.setVisible(true);
+            progressBar.onTransmissionStart();
             // Delay the decision callback just a bit to allow UI update
             javafx.animation.PauseTransition delay = new javafx.animation.PauseTransition(javafx.util.Duration.millis(50));
             delay.setOnFinished(e -> onDecision.accept(true));
@@ -88,6 +87,6 @@ public class ReceivePopup extends Stage {
     }
 
     public void onReceivingProgress(Progress progress) {
-        progressBar.setProgress(progress.totalProgress());
+        progressBar.setProgress(progress);
     }
 }

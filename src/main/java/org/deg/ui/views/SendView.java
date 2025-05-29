@@ -9,9 +9,7 @@ import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -181,16 +179,20 @@ public class SendView extends VBox {
 
                         @Override
                         public void onFinished(Peer receiver) {
-                            Platform.runLater(peerView::onTransmissionStop);
-                            String message = "Transmission to " + receiver.name() + " is complete";
-                            Toast.show(mainStage, message, 3000, ToastMode.SUCCESS);
+                            Platform.runLater(() -> {
+                                String message = "Transmission to " + receiver.name() + " is complete";
+                                Toast.show(mainStage, message, 3000, ToastMode.SUCCESS);
+                                peerView.onTransmissionStop();
+                            });
                         }
 
                         @Override
                         public void onDenied(Peer receiver) {
-                            Platform.runLater(peerView::onTransmissionRejected);
-                            String message = "Transmission was denied by " + receiver.name();
-                            Toast.show(mainStage, message, 3000, ToastMode.INFO);
+                            Platform.runLater(() -> {
+                                String message = "Transmission was denied by " + receiver.name();
+                                Toast.show(mainStage, message, 3000, ToastMode.INFO);
+                                peerView.onTransmissionRejected();
+                            });
                         }
 
                         @Override
@@ -200,8 +202,10 @@ public class SendView extends VBox {
 
                         @Override
                         public void onSendingFailed(Exception e) {
-                            Platform.runLater(peerView::onTransmissionStop);
-                            Toast.show(mainStage, e.getMessage(), 3000, ToastMode.ERROR);
+                            Platform.runLater(() -> {
+                                peerView.onTransmissionStop();
+                                Toast.show(mainStage, e.getMessage(), 3000, ToastMode.ERROR);
+                            });
                         }
                     };
                     peerView.setOnMouseClicked(e -> {
