@@ -47,7 +47,7 @@ public class DiscoveryBroadcaster {
                     socket.receive(response);
 
                     String message = new String(response.getData(), 0, response.getLength());
-                    if (message.startsWith("RESPONSE|")) {
+                    if (message.startsWith("RESPONSE|")) { // TODO add hello message on start
                         Peer peer = Peer.fromDiscoveryResponse(message);
                         if (peer != null && !isSelf(peer, localPeer)) {
                             peers.add(peer);
@@ -64,6 +64,6 @@ public class DiscoveryBroadcaster {
     }
 
     private boolean isSelf(Peer discovered, Peer local) {
-        return false && discovered.ip().equals(local.ip()) && discovered.fileTransferPort() == local.fileTransferPort();
+        return discovered.ip().equals(local.ip()) && discovered.fileTransferPort() == local.fileTransferPort();
     }
 }

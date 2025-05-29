@@ -11,14 +11,18 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.deg.core.FileWithRelativePath;
 import org.deg.core.Peer;
+import org.deg.ui.components.Toast;
+import org.deg.ui.components.ToastMode;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -52,8 +56,12 @@ public class ReceivePopup extends Stage {
         Label details = new Label(numberOfFiles + " files, " + numberOfBytes + " bytes");
 
         HBox buttons = new HBox(10);
+        Button test = new Button("Click Me");
         Button abort = new Button("Abort");
         Button save = new Button("Save to Downloads");
+        test.setOnMouseClicked(event -> {
+            Toast.show(this, "Test", 1000, ToastMode.WARNING);
+        });
         save.setOnMouseClicked(event -> {
             receivingFilesOngoing = true;
             progressBar.setVisible(true);
@@ -65,11 +73,14 @@ public class ReceivePopup extends Stage {
         save.setStyle("-fx-background-color: lightgreen;");
 
         buttons.setAlignment(Pos.CENTER_RIGHT);
-        buttons.getChildren().addAll(abort, save);
+        buttons.getChildren().addAll(test, abort, save);
 
         layout.getChildren().addAll(title, nameBox, profilePic, receivedFiles, details, progressBar, buttons);
 
-        Scene scene = new Scene(layout, 500, 500);
+        StackPane root = new StackPane();
+        root.getChildren().add(layout);
+        Scene scene = new Scene(root, 600, 600);
+        scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/styles.css")).toExternalForm());
 
         progressBar.setProgress(0);
         progressBar.setVisible(false);

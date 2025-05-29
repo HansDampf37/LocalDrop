@@ -31,9 +31,9 @@ public class Toast {
         toastLabel.setOpacity(0);
 
         Pane root = (Pane) stage.getScene().getRoot();
-        StackPane.setMargin(toastLabel, new Insets(0, 20, 20, 0));
+        StackPane.setMargin(toastLabel, new Insets(20, 20, 0, 0));
         root.getChildren().add(toastLabel);
-        StackPane.setAlignment(toastLabel, Pos.BOTTOM_RIGHT);
+        StackPane.setAlignment(toastLabel, Pos.TOP_RIGHT);
 
         // Fade in
         FadeTransition fadeIn = getFadeTransition(durationMillis, toastLabel, root);
