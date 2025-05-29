@@ -8,6 +8,8 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import static org.deg.Settings.ACCEPT_TRANSMISSION_REQUEST;
+
 /**
  * The FileSender class connects to a remote peer and sends files,
  * preceded by file metadata (name and size).
@@ -56,12 +58,12 @@ public class FileSender {
             System.out.println("Waiting for transmission request response...");
             DataInputStream dis = new DataInputStream(socket.getInputStream());
             String accepted = dis.readUTF();
-            if (!accepted.equals("ACCEPT")) {
-                if (callback != null) callback.onDenied(receiver);
-                throw new SendingDeniedException();
-            } else {
+            if (accepted.equals(ACCEPT_TRANSMISSION_REQUEST)) {
                 System.out.println(receiver.name() + " accepted transmission. Start sending files...");
                 if (callback != null) callback.onAccepted(receiver);
+            } else {
+                if (callback != null) callback.onDenied(receiver);
+                throw new SendingDeniedException();
             }
 
             // Step 3: Send file content

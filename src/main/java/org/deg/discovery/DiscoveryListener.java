@@ -7,13 +7,15 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
+import static org.deg.Settings.DISCOVERY_PORT;
+import static org.deg.Settings.DISCOVERY_REQUEST;
+
 /**
  * Listens for UDP broadcast discovery requests and responds with peer info.
  * On start also sends a hello udp broadcast into the network
  */
 public class DiscoveryListener implements Runnable {
     private boolean running = false;
-    private static final int DISCOVERY_PORT = 8888;
     private final Peer peer;
 
     public DiscoveryListener(Peer peer) {
@@ -22,7 +24,6 @@ public class DiscoveryListener implements Runnable {
 
     @Override
     public void run() {
-        sendHelloMessage();
         answerToIncomingDiscoveryRequests();
     }
 
@@ -37,7 +38,7 @@ public class DiscoveryListener implements Runnable {
                 socket.receive(packet);
 
                 String message = new String(packet.getData(), 0, packet.getLength());
-                if ("DISCOVER_REQUEST".equals(message)) {
+                if (DISCOVERY_REQUEST.equals(message)) {
                     String response = peer.toDiscoveryResponse();
 
                     byte[] responseData = response.getBytes();
@@ -50,20 +51,6 @@ public class DiscoveryListener implements Runnable {
             }
         } catch (IOException e) {
             System.err.println("Discovery listener error: " + e.getMessage());
-        }
-    }
-
-    private void sendHelloMessage() {
-        try (DatagramSocket socket = new DatagramSocket(DISCOVERY_PORT, InetAddress.getByName("0.0.0.0"))) {
-            socket.setBroadcast(true);
-            byte[] requestData = peer.toHelloMessage().getBytes();
-            DatagramPacket packet = new DatagramPacket(
-                    requestData, requestData.length,
-                    InetAddress.getByName("255.255.255.255"), DISCOVERY_PORT
-            );
-            socket.send(packet);
-        } catch (IOException e) {
-            System.err.println("Hello message could not be sent: " + e.getMessage());
         }
     }
 

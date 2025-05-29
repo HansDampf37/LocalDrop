@@ -11,6 +11,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.deg.Settings.ACCEPT_TRANSMISSION_REQUEST;
+import static org.deg.Settings.DENY_TRANSMISSION_REQUEST;
+
 /**
  * The FileReceiver class listens on a given port for incoming file transfer requests,
  * receives metadata and file content, and stores the received file locally.
@@ -58,10 +61,10 @@ public class FileReceiver implements Runnable {
                 ).toList();
                 DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
                 if (callback == null || callback.onIncomingFiles(outputFiles, metadata.sender)) {
-                    dos.writeUTF("ACCEPT");
+                    dos.writeUTF(ACCEPT_TRANSMISSION_REQUEST);
                     System.out.println("Accept transmission request");
                 } else {
-                    dos.writeUTF("DENY");
+                    dos.writeUTF(DENY_TRANSMISSION_REQUEST);
                     System.out.println("Deny transmission request");
                     continue;
                 }
@@ -70,7 +73,7 @@ public class FileReceiver implements Runnable {
                 System.out.println("Start receiving of files " + outputFiles.stream().map((FileWithRelativePath f) -> f.file().getName()).toList());
                 int totalBytesReceived = 0;
                 long startTime = System.currentTimeMillis();
-                long totalBytes = outputFiles.stream().mapToLong(f -> f.file().length()).sum();
+                long totalBytes = metadata.fileSizes.stream().mapToLong(Long::longValue).sum();
                 for (int i = 0; i < outputFiles.size(); i++) {
                     long fileSize = metadata.fileSizes.get(i);
                     FileWithRelativePath outputFile = outputFiles.get(i);

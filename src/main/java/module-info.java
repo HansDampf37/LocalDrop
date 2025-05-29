@@ -10,4 +10,5 @@ module localdrop {
     exports org.deg.core.callbacks;
     exports org.deg.discovery;
     opens org.deg.ui to javafx.fxml;
+    exports org.deg;
 }

@@ -1,5 +1,8 @@
 package org.deg.core;
 
+import static org.deg.Settings.DISCOVERY_RESPONSE;
+import static org.deg.Settings.HELLO;
+
 /**
  * Represents a peer in the LAN with a unique name and file transfer port.
  * A peer also has a receiver and can be exposed via a discovery listener.
@@ -17,14 +20,14 @@ public record Peer(String name, String ip, int fileTransferPort) {
     /**
      * Generates a discovery response string for this peer.
      *
-     * @return A string in the format "RESPONSE|name|ip|fileTransferPort".
+     * @return A string in the format "DISCOVERY_RESPONSE|name|ip|fileTransferPort".
      */
     public String toDiscoveryResponse() {
-        return "RESPONSE|" + name + "|" + ip + "|" + fileTransferPort;
+        return DISCOVERY_RESPONSE + "|" + name + "|" + ip + "|" + fileTransferPort;
     }
 
     public String toHelloMessage() {
-        return "HELLO|" + name + "|" + ip + "|" + fileTransferPort;
+        return HELLO + "|" + name + "|" + ip + "|" + fileTransferPort;
     }
 
     /**
@@ -42,5 +45,23 @@ public record Peer(String name, String ip, int fileTransferPort) {
             return new Peer(name, ip, port);
         }
         return null;
+    }
+
+    /**
+     * Static factory method to create a Peer from a hello message string.
+     *
+     * @param message The hello message.
+     * @return A Peer object parsed from the message.
+     */
+    public static Peer fromHelloMessage(String message) {
+        return fromDiscoveryResponse(message);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof Peer otherPeer) {
+            return ip().equals(otherPeer.ip()) && fileTransferPort() == otherPeer.fileTransferPort();
+        }
+        return false;
     }
 }

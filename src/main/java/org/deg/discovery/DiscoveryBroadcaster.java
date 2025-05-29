@@ -10,36 +10,39 @@ import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.deg.Settings.DISCOVERY_PORT;
+import static org.deg.Settings.DISCOVERY_REQUEST;
+import static org.deg.Settings.DISCOVERY_RESPONSE;
+
 /**
- * Sends a UDP broadcast message on the local network to discover peers.
+ * Sends a UDP broadcast message on the local network. Waits for them to respond and returns a list of discovered peers.
  */
 public class DiscoveryBroadcaster {
-
-    private static final int DISCOVERY_PORT = 8888;
-    private static final String DISCOVERY_REQUEST = "DISCOVER_REQUEST";
-
     /**
      * Sends a UDP broadcast request and waits for responses.
      * @param localPeer this apps peer so prevent the discovery process from discovering itself.
+     * @param timeout the number of milliseconds to wait for peers to respond.
      * @return List of discovered peers with IP and port
      */
-    public List<Peer> discoverPeers(Peer localPeer) {
+    public List<Peer> discoverPeers(Peer localPeer, int timeout) {
         List<Peer> peers = new ArrayList<>();
 
         try (DatagramSocket socket = new DatagramSocket()) {
-            socket.setSoTimeout(1000); // 1 second timeout
+            socket.setSoTimeout(timeout);
             socket.setBroadcast(true);
 
             byte[] requestData = DISCOVERY_REQUEST.getBytes();
             DatagramPacket packet = new DatagramPacket(
-                    requestData, requestData.length,
-                    InetAddress.getByName("255.255.255.255"), DISCOVERY_PORT
+                    requestData,
+                    requestData.length,
+                    InetAddress.getByName("255.255.255.255"),
+                    DISCOVERY_PORT
             );
             socket.send(packet);
 
             // Collect responses
             byte[] buffer = new byte[1024];
-            long endTime = System.currentTimeMillis() + 1000;
+            long endTime = System.currentTimeMillis() + timeout;
 
             while (System.currentTimeMillis() < endTime) {
                 try {
@@ -47,9 +50,9 @@ public class DiscoveryBroadcaster {
                     socket.receive(response);
 
                     String message = new String(response.getData(), 0, response.getLength());
-                    if (message.startsWith("RESPONSE|") || message.startsWith("HELLO|")) {
+                    if (message.startsWith(DISCOVERY_RESPONSE + "|")) {
                         Peer peer = Peer.fromDiscoveryResponse(message);
-                        if (peer != null && !isSelf(peer, localPeer)) {
+                        if (peer != null && !peer.equals(localPeer)) {
                             peers.add(peer);
                         }
                     }
@@ -61,9 +64,5 @@ public class DiscoveryBroadcaster {
         }
 
         return peers;
-    }
-
-    private boolean isSelf(Peer discovered, Peer local) {
-        return discovered.ip().equals(local.ip()) && discovered.fileTransferPort() == local.fileTransferPort();
     }
 }

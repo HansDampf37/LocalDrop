@@ -9,6 +9,7 @@ import org.deg.core.callbacks.FileReceivingEventHandler;
 import org.deg.core.callbacks.FileSendingEventHandler;
 import org.deg.discovery.DiscoveryBroadcaster;
 import org.deg.discovery.DiscoveryListener;
+import org.deg.discovery.HelloListener;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,6 +27,7 @@ public class Backend {
     public final Peer localPeer;
     private final FileReceiver fileReceiver;
     private final DiscoveryListener discoveryListener;
+    private final HelloListener helloListener;
     private static final ExecutorService executor = Executors.newCachedThreadPool();
     private final List<Pair<Peer, File>> sentLog = new ArrayList<>();
 
@@ -42,10 +44,13 @@ public class Backend {
         localPeer = new Peer(peerName, localIp, fileTransferPort);
         fileReceiver = new FileReceiver(fileTransferPort, UserConfigurations.DEFAULT_SAFE_PATH);
         discoveryListener = new DiscoveryListener(localPeer);
+        helloListener = new HelloListener(localPeer, (Peer p) -> {
+            System.out.println("New peer joined network " + p.name()); //TODO
+        });
     }
 
     /**
-     * Starts the backend by launching file receiver and discovery listener in background threads.
+     * Starts the backend by launching file receiver and hallo + discovery listener in background threads.
      */
     public void start() {
         Thread receiverThread = new Thread(fileReceiver);
@@ -53,6 +58,9 @@ public class Backend {
 
         Thread discoveryListenerThread = new Thread(discoveryListener);
         discoveryListenerThread.start();
+
+        Thread helloListenerThread = new Thread(helloListener);
+        helloListenerThread.start();
     }
 
     /**
@@ -61,11 +69,12 @@ public class Backend {
     public void stop() {
         fileReceiver.stop();
         discoveryListener.stop();
+        helloListener.stop();
         executor.shutdown();
     }
 
     public List<Peer> discoverPeers() {
-        return new DiscoveryBroadcaster().discoverPeers(localPeer);
+        return new DiscoveryBroadcaster().discoverPeers(localPeer, 2000);
     }
 
     /**

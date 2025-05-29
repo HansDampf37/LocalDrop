@@ -80,7 +80,7 @@ public class ReceivePopup extends Stage {
 
         StackPane root = new StackPane();
         root.getChildren().add(layout);
-        Scene scene = new Scene(root, 700, 800);
+        Scene scene = new Scene(root, 600, 600);
         scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/styles.css")).toExternalForm());
 
         setScene(scene);
