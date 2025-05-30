@@ -31,7 +31,6 @@ public class NetworkTransferUI extends Application {
     private NavButton btnReceive;
     private NavButton btnSend;
     private NavButton btnLogs;
-    private Button btnSettings;
 
     public NetworkTransferUI() throws IOException {
         backend.start();
@@ -85,7 +84,7 @@ public class NetworkTransferUI extends Application {
         btnReceive = new NavButton("Receive", receiveIcon);
         btnSend = new NavButton("Send", sendIcon);
         btnLogs = new NavButton("Logs", logsIcon);
-        btnSettings = new Button("");
+        Button btnSettings = new Button("");
         btnSettings.getStyleClass().add("nav-button-small");
         settingsIcon.setFitWidth(16);
         settingsIcon.setFitHeight(16);

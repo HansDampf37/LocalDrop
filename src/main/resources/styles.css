@@ -92,3 +92,16 @@
     -fx-border-color: rgba(109, 121, 109, 1);
     -fx-text-fill: #000;
 }
+
+.list-cell {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.list-cell:hover {
+    -fx-background-color: #e0e0e0;
+}
+
+.list-cell:selected {
+    -fx-background-color: #c0c0ff;
+}
