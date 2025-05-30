@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -16,6 +17,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.deg.backend.UserConfigurations;
 import org.deg.core.FileWithMetadata;
 import org.deg.core.Peer;
 import org.deg.core.callbacks.Progress;
@@ -60,7 +62,8 @@ public class ReceivePopup extends Stage {
 
         HBox buttons = new HBox(10);
         Button abort = new Button("Abort");
-        Button save = new Button("Save to Downloads");
+        Button save = new Button("Save");
+        save.setTooltip(new Tooltip("Your current data will be saved to '" + UserConfigurations.DEFAULT_SAFE_PATH + "'"));
         save.setOnMouseClicked(event -> {
             progressBar.onTransmissionStart();
             onDecision.accept(true);
