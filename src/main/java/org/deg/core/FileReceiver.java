@@ -98,6 +98,7 @@ public class FileReceiver implements Runnable {
                                 file.createNewFile();
                             } catch (IOException e) {
                                 callback.onReceivingFailed(e);
+                                continue;
                             }
                         }
 
