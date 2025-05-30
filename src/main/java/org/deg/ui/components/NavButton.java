@@ -7,9 +7,6 @@ import javafx.scene.image.ImageView;
 public class NavButton extends Button {
     public NavButton(String text, ImageView icon) {
         super(text);
-        setMaxWidth(Double.MAX_VALUE);
-        setMinWidth(150.0);
-        setMinHeight(75.0);
         getStyleClass().add("nav-button");
         if (icon != null) {
             icon.setFitWidth(16);

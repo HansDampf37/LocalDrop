@@ -8,6 +8,9 @@
     -fx-border-width: 0 0 2 0;
     -fx-padding: 10px;
     -fx-font-size: 14px;
+    -fx-min-width: 150;
+    -fx-min-height: 75;
+    -fx-max-width: 100000;
 }
 .nav-button-small {
     -fx-background-color: #d9f2d9;
