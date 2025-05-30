@@ -45,7 +45,6 @@ public class PeersSelection extends VBox {
         // configure backend
         backend.setOnNewPeerCallback((Peer peer) -> Platform.runLater(() -> peers.add(peer)));
         backend.setOnPeerDisconnectedCallback((Peer peer) -> Platform.runLater(() -> peers.remove(peer)));
-        discoverPeers();
 
         HBox titleBox = new HBox(15);
         Label peersLabel = new Label("Peers");
@@ -77,6 +76,8 @@ public class PeersSelection extends VBox {
         ListView<Peer> peerList = getPeerListView();
 
         getChildren().addAll(titleBox, peerList);
+
+        discoverPeers();
     }
 
     private void discoverPeers() {

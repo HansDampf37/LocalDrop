@@ -24,6 +24,20 @@ public class TextFieldWithNameAndFileChooser extends TextFieldWithName {
         inputField.setMaxWidth(Double.MAX_VALUE);
 
         ImageView fileIcon = new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/icons/file-explorer.png")).toExternalForm()));
+        IconButton chooseSaveToFolder = getOpenFileChooserButton(name, choseDirectories, fileIcon);
+
+        HBox inputBox = new HBox(5);
+        inputBox.setAlignment(Pos.CENTER_LEFT);
+        inputBox.getChildren().addAll(inputField, chooseSaveToFolder);
+
+        HBox.setHgrow(inputField, Priority.ALWAYS);
+        HBox.setHgrow(inputBox, Priority.ALWAYS);
+        VBox.setVgrow(inputBox, Priority.ALWAYS);
+
+        getChildren().addAll(new Label(name), inputBox);
+    }
+
+    private IconButton getOpenFileChooserButton(String name, boolean choseDirectories, ImageView fileIcon) {
         IconButton chooseSaveToFolder = new IconButton(fileIcon);
         chooseSaveToFolder.setOnAction(e -> {
             if (choseDirectories) {
@@ -44,16 +58,7 @@ public class TextFieldWithNameAndFileChooser extends TextFieldWithName {
                 }
             }
         });
-
-        HBox inputBox = new HBox(5);
-        inputBox.setAlignment(Pos.CENTER_LEFT);
-        inputBox.getChildren().addAll(inputField, chooseSaveToFolder);
-
-        HBox.setHgrow(inputField, Priority.ALWAYS);
-        HBox.setHgrow(inputBox, Priority.ALWAYS);
-        VBox.setVgrow(inputBox, Priority.ALWAYS);
-
-        getChildren().addAll(new Label(name), inputBox);
+        return chooseSaveToFolder;
     }
 
 }
