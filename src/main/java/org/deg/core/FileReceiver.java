@@ -93,7 +93,13 @@ public class FileReceiver implements Runnable {
                         FileWithMetadata outputFile = outputFiles.get(i);
                         File file = outputFile.file();
                         if (!file.getParentFile().exists()) file.getParentFile().mkdirs();
-                        if (!file.exists()) file.createNewFile();
+                        if (!file.exists()) {
+                            try {
+                                file.createNewFile();
+                            } catch (IOException e) {
+                                callback.onReceivingFailed(e);
+                            }
+                        }
 
                         try (FileOutputStream fos = new FileOutputStream(file)) {
                             byte[] buffer = new byte[4096];
