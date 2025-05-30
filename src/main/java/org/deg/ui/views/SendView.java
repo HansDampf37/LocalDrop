@@ -9,20 +9,18 @@ import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.*;
-import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.deg.backend.Backend;
-import org.deg.core.Peer;
 import org.deg.core.callbacks.FileSendingEventHandler;
 import org.deg.core.callbacks.Progress;
-import org.deg.ui.components.PeerView;
+import org.deg.ui.components.FilesSelection;
+import org.deg.ui.components.PeerCell;
 import org.deg.ui.components.Toast;
 import org.deg.ui.components.ToastMode;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -31,9 +29,9 @@ import java.util.concurrent.Executors;
 
 public class SendView extends VBox {
     private static final ExecutorService executor = Executors.newCachedThreadPool();
-    private final ObservableList<File> filesToSend = FXCollections.observableArrayList();
-    private final ObservableList<Peer> peers = FXCollections.observableArrayList();
-    private final List<Peer> manuallyAddedPeers = new ArrayList<>();
+    private final FilesSelection filesSelection = new FilesSelection();
+    private final ObservableList<org.deg.core.Peer> peers = FXCollections.observableArrayList();
+    private final List<org.deg.core.Peer> manuallyAddedPeers = new ArrayList<>();
     private final Backend backend;
     private final RotateTransition rotate;
     private final ImageView reloadIcon;
@@ -42,79 +40,14 @@ public class SendView extends VBox {
     public SendView(Backend backend, Stage mainStage) {
         super(15);
         this.backend = backend;
-        backend.setOnNewPeerCallback((Peer peer) -> Platform.runLater(() -> peers.add(peer)));
-        backend.setOnPeerDisconnectedCallback((Peer peer) -> Platform.runLater(() -> peers.remove(peer)));
+        backend.setOnNewPeerCallback((org.deg.core.Peer peer) -> Platform.runLater(() -> peers.add(peer)));
+        backend.setOnPeerDisconnectedCallback((org.deg.core.Peer peer) -> Platform.runLater(() -> peers.remove(peer)));
+        discoverPeers();
 
         this.mainStage = mainStage;
         setPadding(new Insets(15));
 
-        Label dataLabel = new Label("Data");
-        dataLabel.getStyleClass().add("h1");
-
-        HBox innerBox = new HBox(15);
-        innerBox.setPadding(new Insets(0));
-
-        ListView<File> fileList = new ListView<>();
-        fileList.setItems(filesToSend);
-        fileList.setCellFactory(lv -> new ListCell<>() {
-            @Override
-            protected void updateItem(File item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null ? null : item.getName());
-            }
-        });
-        HBox.setHgrow(fileList, Priority.ALWAYS);
-
-        VBox fileButtons = new VBox(10);
-        Button btnAddFile = new Button("Add File");
-        Button btnAddFolder = new Button("Add Folder");
-        Button btnClear = new Button("Clear Selection");
-        btnClear.disableProperty().bind(Bindings.isEmpty(filesToSend));
-        btnAddFolder.setPrefWidth(130);
-        btnAddFile.setPrefWidth(130);
-        btnClear.setPrefWidth(130);
-        btnAddFile.getStyleClass().add("btn");
-        btnAddFolder.getStyleClass().add("btn");
-        btnClear.getStyleClass().add("btn");
-        ImageView fileIcon = new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/icons/document.png")).toExternalForm()));
-        fileIcon.setFitWidth(40);
-        fileIcon.setFitHeight(40);
-        btnAddFile.setGraphic(fileIcon);
-        btnAddFile.setContentDisplay(ContentDisplay.TOP);
-        ImageView folderIcon = new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/icons/folder.png")).toExternalForm()));
-        folderIcon.setFitWidth(40);
-        folderIcon.setFitHeight(40);
-        btnAddFolder.setGraphic(folderIcon);
-        btnAddFolder.setContentDisplay(ContentDisplay.TOP);
-        ImageView clearIcon = new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/icons/clear.png")).toExternalForm()));
-        clearIcon.setFitWidth(40);
-        clearIcon.setFitHeight(40);
-        btnClear.setGraphic(clearIcon);
-        btnClear.setContentDisplay(ContentDisplay.TOP);
-        btnAddFile.setOnAction(e -> {
-            FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("Select File(s)");
-            List<File> selectedFiles = fileChooser.showOpenMultipleDialog(btnAddFile.getScene().getWindow());
-            if (selectedFiles != null) {
-                filesToSend.addAll(selectedFiles);
-            }
-        });
-        btnAddFolder.setOnAction(e -> {
-            DirectoryChooser directoryChooser = new DirectoryChooser();
-            directoryChooser.setTitle("Select Folder");
-            File selectedDir = directoryChooser.showDialog(btnAddFolder.getScene().getWindow());
-            if (selectedDir != null) {
-                filesToSend.add(selectedDir);
-            }
-        });
-        btnClear.setOnAction(e -> filesToSend.clear());
-
-        fileButtons.getChildren().addAll(btnAddFile, btnAddFolder, btnClear);
-
-        innerBox.getChildren().addAll(fileList, fileButtons);
-
         HBox titleBox = new HBox(15);
-
         Label peersLabel = new Label("Peers");
         peersLabel.getStyleClass().add("h1");
 
@@ -128,7 +61,7 @@ public class SendView extends VBox {
         btnManualSend.setContentDisplay(ContentDisplay.CENTER);
         btnManualSend.setOnAction(e -> {
             new AddPeerManually(manuallyAddedPeers).showAndWait();
-            for (Peer peer : manuallyAddedPeers) {
+            for (org.deg.core.Peer peer : manuallyAddedPeers) {
                 if (!peers.contains(peer)) {
                     peers.add(peer);
                 }
@@ -151,22 +84,22 @@ public class SendView extends VBox {
 
         titleBox.getChildren().addAll(peersLabel, btnManualSend, btnReloadDiscovery);
 
-        ListView<Peer> peerList = getPeerListView();
+        ListView<org.deg.core.Peer> peerList = getPeerListView();
 
-        getChildren().addAll(dataLabel, innerBox, titleBox, peerList);
+        getChildren().addAll(filesSelection, titleBox, peerList);
     }
 
-    private ListView<Peer> getPeerListView() {
-        ListView<Peer> peerList = new ListView<>();
+    private ListView<org.deg.core.Peer> getPeerListView() {
+        ListView<org.deg.core.Peer> peerList = new ListView<>();
         peerList.setItems(peers);
         peerList.setCellFactory(list -> new ListCell<>() {
             @Override
-            protected void updateItem(Peer peer, boolean empty) {
+            protected void updateItem(org.deg.core.Peer peer, boolean empty) {
                 super.updateItem(peer, empty);
                 if (empty || peer == null) {
                     setGraphic(null);
                 } else {
-                    PeerView peerView = new PeerView(peer);
+                    PeerCell peerView = new PeerCell(peer);
                     FileSendingEventHandler callback = new FileSendingEventHandler() {
                         @Override
                         public void onSendingProgress(Progress progress) {
@@ -174,11 +107,11 @@ public class SendView extends VBox {
                         }
 
                         @Override
-                        public void onFinished(File file, Peer receiver) {
+                        public void onFinished(java.io.File file, org.deg.core.Peer receiver) {
                         }
 
                         @Override
-                        public void onFinished(Peer receiver) {
+                        public void onFinished(org.deg.core.Peer receiver) {
                             Platform.runLater(() -> {
                                 String message = "Transmission to " + receiver.name() + " is complete";
                                 Toast.show(mainStage, message, 3000, ToastMode.SUCCESS);
@@ -187,7 +120,7 @@ public class SendView extends VBox {
                         }
 
                         @Override
-                        public void onDenied(Peer receiver) {
+                        public void onDenied(org.deg.core.Peer receiver) {
                             Platform.runLater(() -> {
                                 String message = "Transmission was denied by " + receiver.name();
                                 Toast.show(mainStage, message, 3000, ToastMode.INFO);
@@ -196,7 +129,7 @@ public class SendView extends VBox {
                         }
 
                         @Override
-                        public void onAccepted(Peer receiver) {
+                        public void onAccepted(org.deg.core.Peer receiver) {
                             Platform.runLater(peerView::onTransmissionStart);
                         }
 
@@ -210,22 +143,21 @@ public class SendView extends VBox {
                     };
                     peerView.setOnMouseClicked(e -> {
                         peerView.onTransmissionRequested();
-                        backend.startFilesTransfer(backend.localPeer, peer, filesToSend, callback);
+                        backend.startFilesTransfer(backend.localPeer, peer, filesSelection.filesToSend, callback);
                     });
                     setGraphic(peerView);
                 }
             }
         });
         peerList.setSelectionModel(null); // make elements non-clickable
-        discoverPeers();
-        peerList.disableProperty().bind(Bindings.isEmpty(filesToSend));
+        peerList.disableProperty().bind(Bindings.isEmpty(filesSelection.filesToSend));
         return peerList;
     }
 
     private void discoverPeers() {
         executor.submit(() -> {
             Platform.runLater(rotate::play);
-            List<Peer> discoveredPeers = backend.discoverPeers();
+            List<org.deg.core.Peer> discoveredPeers = backend.discoverPeers();
             Platform.runLater(() -> {
                 peers.clear();
                 peers.addAll(discoveredPeers);

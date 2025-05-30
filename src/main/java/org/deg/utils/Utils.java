@@ -1,9 +1,13 @@
 package org.deg.utils;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.io.IOException;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 
 public class Utils {
     /**
@@ -55,6 +59,35 @@ public class Utils {
             sendSocket.send(packet);
         } catch (IOException e) {
             System.err.println("Failed to send message: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Calculates the total size of a directory by summing the sizes of all regular files
+     * contained within it, including files in subdirectories.
+     *
+     * @param dir the directory whose size is to be calculated
+     * @return the total size in bytes of all regular files within the directory
+     * @throws IOException if an I/O error occurs accessing the file system
+     * @throws IllegalArgumentException if the input is not a directory or doesn't exist
+     */
+    public static long getDirSize(File dir) throws IOException {
+        if (dir == null || !dir.exists() || !dir.isDirectory()) {
+            throw new IllegalArgumentException("Input must be an existing directory.");
+        }
+
+        try (var stream = Files.walk(dir.toPath())) {
+            return stream
+                    .filter(Files::isRegularFile)
+                    .mapToLong(p -> {
+                        try {
+                            return Files.size(p);
+                        } catch (IOException e) {
+                            // Optionally log the unreadable file path here
+                            return 0L;
+                        }
+                    })
+                    .sum();
         }
     }
 }

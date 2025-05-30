@@ -10,19 +10,18 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
-import org.deg.core.Peer;
 import org.deg.core.callbacks.Progress;
 
 
 /**
  * View of a peer in the peer-list. Can be configured to display progress regarding the sending progress.
  */
-public class PeerView extends HBox {
+public class PeerCell extends HBox {
     private final FileSendingProgressBar progressBar = new FileSendingProgressBar(false);
     private final ProgressIndicator spinner = new ProgressIndicator();
 
 
-    public PeerView(Peer peer) {
+    public PeerCell(org.deg.core.Peer peer) {
         setPadding(new Insets(10));
         setSpacing(20);
         setAlignment(Pos.CENTER_LEFT);
