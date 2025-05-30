@@ -4,28 +4,29 @@
 
 .nav-button {
     -fx-background-color: #d9f2d9;
-    -fx-border-color: #cccccc;
-    -fx-border-width: 0 0 2 0;
-    -fx-padding: 10px;
+    -fx-border-width: 0 0 0 0;
     -fx-font-size: 14px;
-    -fx-min-width: 150;
-    -fx-min-height: 75;
+    -fx-background-radius: 10px;
     -fx-max-width: 100000;
+    -fx-padding: 0;
 }
 .nav-button-small {
     -fx-background-color: #d9f2d9;
-    -fx-border-color: #cccccc;
-    -fx-border-width: 1 1 1 1;
-    -fx-border-radius: 5px;
     -fx-background-radius: 5px;
     -fx-max-height: 30px;
     -fx-max-width: 30px;
     -fx-min-width: 30px;
     -fx-min-height: 30px;
 }
-
 .nav-button:hover, .nav-button-small:hover {
     -fx-background-color: #c0e7c0;
+}
+.icon-wrapper {
+    -fx-padding: 10;
+}
+.icon-wrapper.active {
+    -fx-background-color: rgba(50, 50, 50, 0.2);
+    -fx-background-radius: 10px;
 }
 
 .navBar {
@@ -39,10 +40,6 @@
 .title {
     -fx-font-size: 24px;
     -fx-font-weight: bold;
-}
-
-.active {
-    -fx-border-color: #444;
 }
 
 .nameLabel {

@@ -72,8 +72,8 @@ public class NetworkTransferUI extends Application {
     private VBox createNavBar() {
         VBox navBar = new VBox();
         navBar.setAlignment(Pos.CENTER);
-        navBar.setPadding(new Insets(10));
-        navBar.setSpacing(10);
+        navBar.setPadding(new Insets(20));
+        navBar.setSpacing(20);
         navBar.getStyleClass().add("navBar");
         navBar.setPrefWidth(200);
 
@@ -105,34 +105,30 @@ public class NetworkTransferUI extends Application {
     }
 
     private void loadReceivePage() {
-        btnReceive.getStyleClass().add("active");
-        btnLogs.getStyleClass().remove("active");
-        btnSend.getStyleClass().remove("active");
-        btnSettings.getStyleClass().remove("active");
+        btnReceive.activate();
+        btnLogs.deactivate();
+        btnSend.deactivate();
         mainContent.getChildren().setAll(receiveView);
     }
 
     private void loadSendPage() {
-        btnReceive.getStyleClass().remove("active");
-        btnSend.getStyleClass().add("active");
-        btnLogs.getStyleClass().remove("active");
-        btnSettings.getStyleClass().remove("active");
+        btnReceive.deactivate();
+        btnSend.activate();
+        btnLogs.deactivate();
         mainContent.getChildren().setAll(sendView);
     }
 
     private void loadLogsPage() {
-        btnReceive.getStyleClass().remove("active");
-        btnSend.getStyleClass().remove("active");
-        btnLogs.getStyleClass().add("active");
-        btnSettings.getStyleClass().remove("active");
+        btnReceive.deactivate();
+        btnSend.deactivate();
+        btnLogs.activate();
         mainContent.getChildren().setAll(new LogView(backend));
     }
 
     private void loadSettingsPage() {
-        btnReceive.getStyleClass().remove("active");
-        btnSend.getStyleClass().remove("active");
-        btnLogs.getStyleClass().remove("active");
-        btnSettings.getStyleClass().add("active");
+        btnReceive.deactivate();
+        btnSend.deactivate();
+        btnLogs.deactivate();
         mainContent.getChildren().setAll(new SettingsView());
     }
 }
