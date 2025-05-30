@@ -2,26 +2,26 @@ package org.deg.ui.views;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
+import javafx.scene.control.ContentDisplay;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import org.deg.ui.components.TextFieldWithName;
-import org.deg.ui.components.TextFieldWithNameAndFileChooser;
-import org.deg.ui.components.Toast;
-import org.deg.ui.components.ToastMode;
+import org.deg.ui.components.*;
 
 import java.io.File;
+import java.util.Objects;
 
 import static org.deg.backend.UserConfigurations.*;
 
-public class SettingsView extends Pane {
+public class SettingsView extends VBox {
     public SettingsView() {
-        VBox vbox = new VBox(15);
-        vbox.setSpacing(10);
-        vbox.setPadding(new Insets(10));
-        vbox.setAlignment(Pos.TOP_CENTER);
+        super(15);
+        setSpacing(10);
+        setPadding(new Insets(10));
+        setAlignment(Pos.TOP_CENTER);
 
         TextFieldWithName nameInput = new TextFieldWithName("Your Name");
         nameInput.inputField.setText(USERNAME);
@@ -30,8 +30,14 @@ public class SettingsView extends Pane {
         savePathInput.inputField.setText(DEFAULT_SAFE_PATH.getAbsolutePath());
 
         HBox buttonContainer = new HBox(15);
-        Button revertButton = new Button("Revert Changes");
-        Button saveButton = new Button("Save");
+        buttonContainer.setAlignment(Pos.CENTER_RIGHT);
+        ImageView reloadIcon = new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/icons/revert.png")).toExternalForm()));
+        IconButton revertButton = new IconButton("Revert Changes", reloadIcon, 20, 20);
+        revertButton.setContentDisplay(ContentDisplay.LEFT);
+
+        ImageView saveIcon = new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/icons/save.png")).toExternalForm()));
+        IconButton saveButton = new IconButton("Save", saveIcon, 20, 20);
+        saveButton.setContentDisplay(ContentDisplay.LEFT);
         revertButton.setOnAction(event -> {
             nameInput.setText(USERNAME);
             savePathInput.setText(DEFAULT_SAFE_PATH.getAbsolutePath());
@@ -58,10 +64,10 @@ public class SettingsView extends Pane {
                 saveConfigurations();
             }
         });
-
+        VBox gap = new VBox();
+        VBox.setVgrow(gap, Priority.ALWAYS);
         buttonContainer.getChildren().addAll(revertButton, saveButton);
-        vbox.getChildren().addAll(nameInput, savePathInput, buttonContainer);
-        getChildren().add(vbox);
+        getChildren().addAll(nameInput, savePathInput, gap, buttonContainer);
     }
 
     private boolean usernameValid(String username) {

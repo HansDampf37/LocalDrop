@@ -88,7 +88,7 @@
     -fx-text-fill: #fff;
 }
 .info {
-    -fx-background-color: rgba(217, 242, 217, 1);
+    -fx-background-color: rgb(231, 241, 231);
     -fx-border-color: rgba(109, 121, 109, 1);
     -fx-text-fill: #000;
 }

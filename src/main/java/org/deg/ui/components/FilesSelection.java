@@ -112,7 +112,7 @@ public class FilesSelection extends VBox {
             protected void updateItem(File item, boolean empty) {
                 super.updateItem(item, empty);
                 if (!empty && item != null) {
-                    long fileSize = 0;
+                    long fileSize;
                     try {
                         fileSize = item.isFile() ? item.length() : Utils.getDirSize(item);
                     } catch (IOException e) {

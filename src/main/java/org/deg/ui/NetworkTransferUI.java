@@ -55,7 +55,7 @@ public class NetworkTransferUI extends Application {
 
         mainContent = new StackPane();
         receiveView = new ReceiveView(backend.localPeer);
-        sendView = new SendView(backend, primaryStage);
+        sendView = new SendView(backend);
         loadSendPage();
 
         borderPane.setCenter(mainContent);

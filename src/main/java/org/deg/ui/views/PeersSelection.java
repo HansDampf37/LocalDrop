@@ -16,6 +16,7 @@ import org.deg.backend.Backend;
 import org.deg.core.Peer;
 import org.deg.core.callbacks.FileSendingEventHandler;
 import org.deg.core.callbacks.Progress;
+import org.deg.ui.components.IconButton;
 import org.deg.ui.components.PeerCell;
 import org.deg.ui.components.Toast;
 import org.deg.ui.components.ToastMode;
@@ -34,14 +35,12 @@ public class PeersSelection extends VBox {
     private final Backend backend;
     private final RotateTransition rotate;
     private final ImageView reloadIcon;
-    private final Stage mainStage;
     private final ObservableList<File> filesToSend;
 
-    public PeersSelection(Backend backend, ObservableList<File> selectedFiles, Stage mainStage) {
+    public PeersSelection(Backend backend, ObservableList<File> selectedFiles) {
         super(15);
         this.backend = backend;
         this.filesToSend = selectedFiles;
-        this.mainStage = mainStage;
 
         // configure backend
         backend.setOnNewPeerCallback((Peer peer) -> Platform.runLater(() -> peers.add(peer)));
@@ -52,14 +51,9 @@ public class PeersSelection extends VBox {
         Label peersLabel = new Label("Peers");
         peersLabel.getStyleClass().add("h1");
 
-        Button btnManualSend = new Button();
-        btnManualSend.setTooltip(new Tooltip("Can't find the peer? Send you Data to a manually configured Peer!"));
-        btnManualSend.getStyleClass().add("btn");
         ImageView plusIcon = new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/icons/plus.png")).toExternalForm()));
-        plusIcon.setFitWidth(20);
-        plusIcon.setFitHeight(20);
-        btnManualSend.setGraphic(plusIcon);
-        btnManualSend.setContentDisplay(ContentDisplay.CENTER);
+        IconButton btnManualSend = new IconButton(plusIcon);
+        btnManualSend.setTooltip(new Tooltip("Can't find the peer? Send you Data to a manually configured Peer!"));
         btnManualSend.setOnAction(e -> {
             new AddPeerManually(manuallyAddedPeers).showAndWait();
             for (Peer peer : manuallyAddedPeers) {
@@ -69,18 +63,13 @@ public class PeersSelection extends VBox {
             }
         });
 
-        Button btnReloadDiscovery = new Button();
-        btnReloadDiscovery.setTooltip(new Tooltip("Discover peers in the same network"));
-        btnReloadDiscovery.getStyleClass().add("btn");
         reloadIcon = new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/icons/reload.png")).toExternalForm()));
-        reloadIcon.setFitWidth(20);
-        reloadIcon.setFitHeight(20);
+        IconButton btnReloadDiscovery = new IconButton(reloadIcon);
+        btnReloadDiscovery.setTooltip(new Tooltip("Discover peers in the same network"));
         rotate = new RotateTransition(Duration.seconds(10), reloadIcon);
         rotate.setByAngle(3600);
         rotate.setCycleCount(RotateTransition.INDEFINITE);
         rotate.setInterpolator(javafx.animation.Interpolator.LINEAR);
-        btnReloadDiscovery.setGraphic(reloadIcon);
-        btnReloadDiscovery.setContentDisplay(ContentDisplay.CENTER);
         btnReloadDiscovery.setOnAction(e -> discoverPeers());
 
         titleBox.getChildren().addAll(peersLabel, btnManualSend, btnReloadDiscovery);
@@ -129,7 +118,8 @@ public class PeersSelection extends VBox {
                         public void onFinished(Peer receiver) {
                             Platform.runLater(() -> {
                                 String message = "Transmission to " + receiver.name() + " is complete";
-                                Toast.show(mainStage, message, 3000, ToastMode.SUCCESS);
+                                Stage stage = (Stage) getScene().getWindow();
+                                Toast.show(stage, message, 3000, ToastMode.SUCCESS);
                                 peerView.onTransmissionStop();
                             });
                         }
@@ -138,7 +128,8 @@ public class PeersSelection extends VBox {
                         public void onDenied(Peer receiver) {
                             Platform.runLater(() -> {
                                 String message = "Transmission was denied by " + receiver.name();
-                                Toast.show(mainStage, message, 3000, ToastMode.INFO);
+                                Stage stage = (Stage) getScene().getWindow();
+                                Toast.show(stage, message, 3000, ToastMode.INFO);
                                 peerView.onTransmissionRejected();
                             });
                         }
@@ -152,7 +143,8 @@ public class PeersSelection extends VBox {
                         public void onSendingFailed(Exception e) {
                             Platform.runLater(() -> {
                                 peerView.onTransmissionStop();
-                                Toast.show(mainStage, e.getMessage(), 3000, ToastMode.ERROR);
+                                Stage stage = (Stage) getScene().getWindow();
+                                Toast.show(stage, e.getMessage(), 3000, ToastMode.ERROR);
                             });
                         }
                     };

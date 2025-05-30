@@ -15,6 +15,8 @@ public class IconButton extends Button {
             setGraphic(icon);
             if (text != null) {
                 setContentDisplay(ContentDisplay.TOP);
+            } else {
+                setContentDisplay(ContentDisplay.CENTER);
             }
         }
         getStyleClass().add("btn");
