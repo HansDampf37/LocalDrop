@@ -1,6 +1,6 @@
 package org.deg.core;
 
-public class Settings {
+public class Constants {
     public static final int DISCOVERY_PORT = 8888;
     public static final String DISCOVERY_REQUEST = "DISCOVERY_REQUEST";
     public static final String DISCOVERY_RESPONSE = "DISCOVERY_RESPONSE";

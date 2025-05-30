@@ -16,4 +16,8 @@ public class TextFieldWithName extends VBox {
     public String getText() {
         return inputField.getText();
     }
+
+    public void setText(String text) {
+        inputField.setText(text);
+    }
 }

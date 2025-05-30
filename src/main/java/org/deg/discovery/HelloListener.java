@@ -9,7 +9,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.function.Consumer;
 
-import static org.deg.core.Settings.*;
+import static org.deg.core.Constants.*;
 import static org.deg.utils.Utils.sendUDPBroadcast;
 
 /**

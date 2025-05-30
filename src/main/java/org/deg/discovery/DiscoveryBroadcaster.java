@@ -10,9 +10,9 @@ import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.deg.core.Settings.DISCOVERY_PORT;
-import static org.deg.core.Settings.DISCOVERY_REQUEST;
-import static org.deg.core.Settings.DISCOVERY_RESPONSE;
+import static org.deg.core.Constants.DISCOVERY_PORT;
+import static org.deg.core.Constants.DISCOVERY_REQUEST;
+import static org.deg.core.Constants.DISCOVERY_RESPONSE;
 
 /**
  * Sends a UDP broadcast message on the local network. Waits for them to respond and returns a list of discovered peers.

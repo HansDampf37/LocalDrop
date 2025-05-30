@@ -28,6 +28,7 @@ public class FilesSelection extends VBox {
     public final ObservableList<File> filesToSend = FXCollections.observableArrayList();
 
     public FilesSelection() {
+        super(15);
         HBox dataTitleBar = getDataTitleBar();
 
         HBox innerBox = new HBox(15);
@@ -55,7 +56,7 @@ public class FilesSelection extends VBox {
         btnAddFolder.setOnAction(e -> {
             DirectoryChooser directoryChooser = new DirectoryChooser();
             directoryChooser.setTitle("Select Folder");
-            java.io.File selectedDir = directoryChooser.showDialog(btnAddFolder.getScene().getWindow());
+            File selectedDir = directoryChooser.showDialog(btnAddFolder.getScene().getWindow());
             if (selectedDir != null) {
                 filesToSend.add(selectedDir);
             }
@@ -81,8 +82,8 @@ public class FilesSelection extends VBox {
         StringBinding formattedSizeBinding = Bindings.createStringBinding(
                 () -> {
                     if (!filesToSend.isEmpty()) {
-                        long bytesInFiles = filesToSend.stream().filter(java.io.File::isFile).mapToLong(java.io.File::length).sum();
-                        long bytesInDirs = filesToSend.stream().filter(java.io.File::isDirectory).mapToLong(dir -> {
+                        long bytesInFiles = filesToSend.stream().filter(File::isFile).mapToLong(File::length).sum();
+                        long bytesInDirs = filesToSend.stream().filter(File::isDirectory).mapToLong(dir -> {
                             try {
                                 return Utils.getDirSize(dir);
                             } catch (IOException e) {
@@ -104,7 +105,7 @@ public class FilesSelection extends VBox {
     }
 
     private ListView<File> getFileList() {
-        ListView<java.io.File> fileList = new ListView<>();
+        ListView<File> fileList = new ListView<>();
         fileList.setItems(filesToSend);
         fileList.setCellFactory(lv -> new ListCell<>() {
             @Override
@@ -130,7 +131,7 @@ public class FilesSelection extends VBox {
         HBox.setHgrow(fileList, Priority.ALWAYS);
         fileList.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.DELETE) {
-                java.io.File selectedFile = fileList.getSelectionModel().getSelectedItem();
+                File selectedFile = fileList.getSelectionModel().getSelectedItem();
                 if (selectedFile != null) {
                     filesToSend.remove(selectedFile);
                 }

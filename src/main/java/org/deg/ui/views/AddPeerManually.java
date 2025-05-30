@@ -13,6 +13,7 @@ import org.deg.core.Peer;
 import org.deg.ui.components.TextFieldWithName;
 
 import java.util.List;
+import java.util.Objects;
 
 public class AddPeerManually extends Stage {
     private final List<Peer> listToAddTo;
@@ -24,6 +25,7 @@ public class AddPeerManually extends Stage {
         setTitle("Add a peer manually");
 
         Scene scene = new Scene(getLayout(), 320, 235);
+        scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/styles.css")).toExternalForm());
         setScene(scene);
     }
 
@@ -43,15 +45,29 @@ public class AddPeerManually extends Stage {
         Button confirmButton = new Button("Confirm");
         cancelButton.setOnAction(e -> Platform.runLater(this::close));
         confirmButton.setOnMouseClicked(event -> Platform.runLater(() -> {
+            boolean success = true;
             String name = nameInput.getText();
             String ip = ipInput.getText();
             String port = portInput.getText();
 
+            if (name == null || name.trim().isEmpty()) {
+                success = false;
+                nameInput.inputField.getStyleClass().add("wrongInput");
+            } else {
+                nameInput.inputField.getStyleClass().remove("wrongInput");
+            }
+            if (ip == null || ip.trim().isEmpty()) {
+                success = false;
+                ipInput.inputField.getStyleClass().add("wrongInput");
+            } else {
+                ipInput.inputField.getStyleClass().remove("wrongInput");
+            }
             try {
                 listToAddTo.add(new Peer(name, ip, Integer.parseInt(port)));
-                this.close();
+                portInput.inputField.getStyleClass().remove("wrongInput");
+                if (success) this.close();
             } catch (NumberFormatException e) {
-                portInput.inputField.setStyle("-fx-background-color: #ee7777");
+                portInput.inputField.getStyleClass().add("wrongInput");
             }
         }));
         confirmCancelBox.getChildren().addAll(cancelButton, confirmButton);

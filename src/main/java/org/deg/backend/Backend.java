@@ -38,6 +38,7 @@ public class Backend {
      * @throws IOException if no suitable IP address or port can be found.
      */
     public Backend() throws IOException {
+        UserConfigurations.loadConfigurations();
         String peerName = UserConfigurations.USERNAME;
         String localIp = findLanAddress();
         int fileTransferPort = findFreePort();

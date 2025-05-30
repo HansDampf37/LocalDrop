@@ -1,6 +1,6 @@
 package org.deg.core;
 
-import static org.deg.core.Settings.*;
+import static org.deg.core.Constants.*;
 
 /**
  * Represents a peer in the LAN with a unique name and file transfer port.
