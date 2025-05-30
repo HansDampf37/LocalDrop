@@ -1,6 +1,6 @@
 package org.deg.core.callbacks;
 
-import org.deg.core.FileWithRelativePath;
+import org.deg.core.FileWithMetadata;
 import org.deg.core.Peer;
 
 import java.util.List;
@@ -16,7 +16,7 @@ public interface FileReceivingEventHandler {
      * @param sender the sending peer
      * @return whether to accept this request
      */
-    boolean onIncomingFiles(List<FileWithRelativePath> files, Peer sender);
+    boolean onIncomingFiles(List<FileWithMetadata> files, Peer sender);
 
     /**
      * Is called when new bytes are received.
@@ -29,7 +29,7 @@ public interface FileReceivingEventHandler {
      * @param file the file
      * @param sender the sending peer
      */
-    void onReceivingFinished(FileWithRelativePath file, Peer sender);
+    void onReceivingFinished(FileWithMetadata file, Peer sender);
 
     /**
      * Is called when ALL files were successfully transmitted

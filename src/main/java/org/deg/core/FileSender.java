@@ -17,7 +17,7 @@ import static org.deg.core.Settings.ACCEPT_TRANSMISSION_REQUEST;
 public class FileSender {
     private final Peer sender;
     private final Peer receiver;
-    private final List<FileWithRelativePath> files;
+    private final List<FileWithMetadata> files;
 
     /**
      * Constructs a FileSender for a set of files and target peer.
@@ -45,8 +45,8 @@ public class FileSender {
             System.out.println("Send transmission request to " + receiver.name());
             Metadata metadata = new Metadata(
                     files.size(),
-                    files.stream().map(FileWithRelativePath::relativePath).toList(),
-                    files.stream().map((FileWithRelativePath f) -> f.file().length()).toList(),
+                    files.stream().map(FileWithMetadata::relativePath).toList(),
+                    files.stream().map(FileWithMetadata::sizeInBytes).toList(),
                     sender
             );
             String metadataStr = MetadataHandler.buildMetadata(metadata);
@@ -70,8 +70,8 @@ public class FileSender {
             int i = 0;
             int totalBytesSent = 0;
             long startTime = System.currentTimeMillis();
-            long totalBytes = files.stream().mapToLong(f -> f.file().length()).sum();
-            for (File file : files.stream().map(FileWithRelativePath::file).toList()) {
+            long totalBytes = files.stream().mapToLong(FileWithMetadata::sizeInBytes).sum();
+            for (File file : files.stream().map(FileWithMetadata::file).toList()) {
                 try (FileInputStream fis = new FileInputStream(file)) {
                     byte[] buffer = new byte[4096];
                     int bytesRead;

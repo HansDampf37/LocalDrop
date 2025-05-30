@@ -1,7 +1,7 @@
 package org.deg.ui;
 
 import javafx.application.Platform;
-import org.deg.core.FileWithRelativePath;
+import org.deg.core.FileWithMetadata;
 import org.deg.core.Peer;
 import org.deg.core.callbacks.FileReceivingEventHandler;
 import org.deg.core.callbacks.Progress;
@@ -17,7 +17,7 @@ public class FileReceivingHandler implements FileReceivingEventHandler {
     private ReceivePopup receivePopup = null;
 
     @Override
-    public boolean onIncomingFiles(List<FileWithRelativePath> files, Peer sender) {
+    public boolean onIncomingFiles(List<FileWithMetadata> files, Peer sender) {
         CompletableFuture<Boolean> userResponse = new CompletableFuture<>();
 
         Platform.runLater(() -> {
@@ -47,7 +47,7 @@ public class FileReceivingHandler implements FileReceivingEventHandler {
     }
 
     @Override
-    public void onReceivingFinished(FileWithRelativePath file, Peer sender) {}
+    public void onReceivingFinished(FileWithMetadata file, Peer sender) {}
 
     @Override
     public void onReceivingFinished(Peer sender) {

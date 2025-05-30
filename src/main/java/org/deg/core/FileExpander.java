@@ -12,20 +12,20 @@ public class FileExpander {
      * @param filesToSend List of files or directories
      * @return List of files with their relative paths
      */
-    public static List<FileWithRelativePath> expandFilesWithRelativePaths(List<File> filesToSend) {
-        List<FileWithRelativePath> result = new ArrayList<>();
+    public static List<FileWithMetadata> expandFilesWithRelativePaths(List<File> filesToSend) {
+        List<FileWithMetadata> result = new ArrayList<>();
         for (File file : filesToSend) {
             if (file.isDirectory()) {
                 result.addAll(getFilesRecursively(file, file));
             } else {
-                result.add(new FileWithRelativePath(file, file.getName()));
+                result.add(new FileWithMetadata(file, file.getName(), file.length()));
             }
         }
         return result;
     }
 
-    private static List<FileWithRelativePath> getFilesRecursively(File rootDir, File current) {
-        List<FileWithRelativePath> files = new ArrayList<>();
+    private static List<FileWithMetadata> getFilesRecursively(File rootDir, File current) {
+        List<FileWithMetadata> files = new ArrayList<>();
         File[] contents = current.listFiles();
         if (contents != null) {
             for (File file : contents) {
@@ -33,7 +33,7 @@ public class FileExpander {
                     files.addAll(getFilesRecursively(rootDir, file));
                 } else {
                     String relativePath = rootDir.getName() + File.separator + rootDir.toPath().relativize(file.toPath());
-                    files.add(new FileWithRelativePath(file, relativePath));
+                    files.add(new FileWithMetadata(file, relativePath, file.length()));
                 }
             }
         }

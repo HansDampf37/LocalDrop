@@ -16,7 +16,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import org.deg.core.FileWithRelativePath;
+import org.deg.core.FileWithMetadata;
 import org.deg.core.Peer;
 import org.deg.core.callbacks.Progress;
 import org.deg.ui.components.FileSendingProgressBar;
@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 public class ReceivePopup extends Stage {
     private final FileSendingProgressBar progressBar = new FileSendingProgressBar(false);
 
-    public ReceivePopup(List<FileWithRelativePath> files, Peer sender, Consumer<Boolean> onDecision) {
+    public ReceivePopup(List<FileWithMetadata> files, Peer sender, Consumer<Boolean> onDecision) {
         super();
         initModality(Modality.APPLICATION_MODAL);
         setTitle("Data received by " + sender.name());
@@ -50,9 +50,9 @@ public class ReceivePopup extends Stage {
         profilePic.setClip(clip);
 
         ListView<String> receivedFiles = new ListView<>();
-        receivedFiles.setItems(FXCollections.observableList(files.stream().map(FileWithRelativePath::relativePath).collect(Collectors.toList())));
+        receivedFiles.setItems(FXCollections.observableList(files.stream().map(FileWithMetadata::relativePath).collect(Collectors.toList())));
         int numberOfFiles = files.size();
-        long numberOfBytes = files.stream().mapToLong((FileWithRelativePath f) -> f.file().length()).sum();
+        long numberOfBytes = files.stream().mapToLong(FileWithMetadata::sizeInBytes).sum();
         Label details = new Label(numberOfFiles + " files, " + Utils.bytesToReadableString(numberOfBytes));
 
         HBox.setHgrow(progressBar, Priority.ALWAYS);
@@ -63,10 +63,9 @@ public class ReceivePopup extends Stage {
         Button save = new Button("Save to Downloads");
         save.setOnMouseClicked(event -> {
             progressBar.onTransmissionStart();
-            // Delay the decision callback just a bit to allow UI update
-            javafx.animation.PauseTransition delay = new javafx.animation.PauseTransition(javafx.util.Duration.millis(50));
-            delay.setOnFinished(e -> onDecision.accept(true));
-            delay.play();
+            onDecision.accept(true);
+            save.setDisable(true);
+            abort.setDisable(true);
         });
         abort.setOnMouseClicked(event -> onDecision.accept(false));
 

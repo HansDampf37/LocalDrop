@@ -63,7 +63,7 @@ public class Backend {
     }
 
     /**
-     * Stops the backend gracefully. (Not really)
+     * Stops the backend gracefully.
      */
     public void stop() {
         fileReceiver.stop();

@@ -21,6 +21,7 @@ import static org.deg.core.Settings.DENY_TRANSMISSION_REQUEST;
 public class FileReceiver implements Runnable {
     private final int port;
     private boolean running = false;
+    private ServerSocket serverSocket;
     private FileReceivingEventHandler callback = null;
     private final File defaultSaveDirectory;
     private final List<Pair<Peer, File>> receivedLog = new ArrayList<>();
@@ -41,89 +42,118 @@ public class FileReceiver implements Runnable {
     @Override
     public void run() {
         running = true;
-        try (ServerSocket serverSocket = new ServerSocket(port)) {
+        try {
+            serverSocket = new ServerSocket(port);
             System.out.println("Receiver listening on port " + port + "...");
             while (running) {
-                Socket socket = serverSocket.accept();
-                DataInputStream dis = new DataInputStream(socket.getInputStream());
-
-                // Step 1: Read metadata
-                int length = dis.readInt();
-                byte[] data = new byte[length];
-                dis.readFully(data);
-                String metadataStr = new String(data, StandardCharsets.UTF_8);
-                Metadata metadata = MetadataHandler.parseMetadata(metadataStr);
-                System.out.println("Transmission request received from " + metadata.sender.name() + ", Filename: " + metadata.fileNames);
-
-                // Step 2: Accept transmission
-                List<FileWithRelativePath> outputFiles = metadata.fileNames.stream().map(
-                        (name) -> new FileWithRelativePath(new File(defaultSaveDirectory, name), name)
-                ).toList();
-                DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
-                if (callback == null || callback.onIncomingFiles(outputFiles, metadata.sender)) {
-                    dos.writeUTF(ACCEPT_TRANSMISSION_REQUEST);
-                    System.out.println("Accept transmission request");
-                } else {
-                    dos.writeUTF(DENY_TRANSMISSION_REQUEST);
-                    System.out.println("Deny transmission request");
-                    continue;
+                Socket socket;
+                try {
+                    socket = serverSocket.accept();
+                } catch (IOException e) {
+                    if (!running) break;
+                    throw e;
                 }
 
-                // Step 3: Receive transmission
-                System.out.println("Start receiving of files " + outputFiles.stream().map((FileWithRelativePath f) -> f.file().getName()).toList());
-                int totalBytesReceived = 0;
-                long startTime = System.currentTimeMillis();
-                long totalBytes = metadata.fileSizes.stream().mapToLong(Long::longValue).sum();
-                for (int i = 0; i < outputFiles.size(); i++) {
-                    long fileSize = metadata.fileSizes.get(i);
-                    FileWithRelativePath outputFile = outputFiles.get(i);
-                    if (!outputFile.file().getParentFile().exists()) outputFile.file().getParentFile().mkdirs();
-                    if (!outputFile.file().exists()) outputFile.file().createNewFile();
+                try (DataInputStream dis = new DataInputStream(socket.getInputStream());
+                     DataOutputStream dos = new DataOutputStream(socket.getOutputStream())) {
 
-                    try (FileOutputStream fos = new FileOutputStream(outputFile.file())) {
-                        byte[] buffer = new byte[4096];
-                        long remaining = fileSize;
-                        int bytesRead;
-                        while (remaining > 0 && (bytesRead = dis.read(buffer, 0, (int) Math.min(buffer.length, remaining))) != -1) {
-                            fos.write(buffer, 0, bytesRead);
-                            remaining -= bytesRead;
-                            totalBytesReceived += bytesRead;
-                            if (callback != null) {
-                                Progress progress = new Progress(
-                                        outputFile,
-                                        totalBytesReceived,
-                                        totalBytes,
-                                        i,
-                                        outputFiles.size()
-                                );
-                                long durationSoFar = System.currentTimeMillis() - startTime;
-                                float totalTimeInSeconds = durationSoFar / 1000f;
-                                progress.bitsPerSecondEstimation = (long)(totalBytesReceived * 8L / totalTimeInSeconds);
-                                callback.onReceivingProgress(progress);
+                    // Step 1: Read metadata
+                    int length = dis.readInt();
+                    byte[] data = new byte[length];
+                    dis.readFully(data);
+                    String metadataStr = new String(data, StandardCharsets.UTF_8);
+                    Metadata metadata = MetadataHandler.parseMetadata(metadataStr);
+                    List<FileWithMetadata> outputFiles = new ArrayList<>();
+                    for (int i = 0; i < metadata.fileCount; i++) {
+                        String name = metadata.fileNames.get(i);
+                        long size = metadata.fileSizes.get(i);
+                        FileWithMetadata outputFile = new FileWithMetadata(new File(defaultSaveDirectory, name), name, size);
+                        outputFiles.add(outputFile);
+                    }
+                    System.out.println("Transmission request received from " + metadata.sender.name() + ", Filename: " + metadata.fileNames);
+
+                    // Step 2: Accept or deny
+                    if (callback == null || callback.onIncomingFiles(outputFiles, metadata.sender)) {
+                        dos.writeUTF(ACCEPT_TRANSMISSION_REQUEST);
+                        System.out.println("Accept transmission request");
+                    } else {
+                        dos.writeUTF(DENY_TRANSMISSION_REQUEST);
+                        System.out.println("Deny transmission request");
+                        continue;
+                    }
+
+                    // Step 3: Receive files
+                    System.out.println("Start receiving of files " + outputFiles.stream().map(f -> f.file().getName()).toList());
+                    int totalBytesReceived = 0;
+                    long startTime = System.currentTimeMillis();
+                    long totalBytes = metadata.fileSizes.stream().mapToLong(Long::longValue).sum();
+
+                    for (int i = 0; i < outputFiles.size(); i++) {
+                        long fileSize = metadata.fileSizes.get(i);
+                        FileWithMetadata outputFile = outputFiles.get(i);
+                        File file = outputFile.file();
+                        if (!file.getParentFile().exists()) file.getParentFile().mkdirs();
+                        if (!file.exists()) file.createNewFile();
+
+                        try (FileOutputStream fos = new FileOutputStream(file)) {
+                            byte[] buffer = new byte[4096];
+                            long remaining = fileSize;
+                            int bytesRead;
+                            while (remaining > 0 && (bytesRead = dis.read(buffer, 0, (int) Math.min(buffer.length, remaining))) != -1) {
+                                fos.write(buffer, 0, bytesRead);
+                                remaining -= bytesRead;
+                                totalBytesReceived += bytesRead;
+
+                                if (callback != null) {
+                                    Progress progress = new Progress(outputFile, totalBytesReceived, totalBytes, i, outputFiles.size());
+                                    long durationSoFar = System.currentTimeMillis() - startTime;
+                                    float totalTimeInSeconds = durationSoFar / 1000f;
+                                    progress.bitsPerSecondEstimation = (long) (totalBytesReceived * 8L / totalTimeInSeconds);
+                                    callback.onReceivingProgress(progress);
+                                }
                             }
                         }
+
+                        System.out.println("Finished receiving file: " + file.getAbsolutePath());
+                        receivedLog.add(new Pair<>(metadata.sender, file));
+                        if (callback != null) callback.onReceivingFinished(outputFile, metadata.sender);
                     }
-                    System.out.println("Finished receiving of file " + outputFile.file().getAbsolutePath());
-                    receivedLog.add(new Pair<>(metadata.sender, outputFile.file()));
-                    if (callback != null) callback.onReceivingFinished(outputFile, metadata.sender);
+
+                    System.out.println("All files received successfully");
+                    if (callback != null) callback.onReceivingFinished(metadata.sender);
+
+                } catch (IOException e) {
+                    System.err.println("Error during file reception: " + e.getMessage());
+                    if (callback != null) callback.onReceivingFailed(e);
                 }
-                System.out.println("All files received successfully");
-                if (callback != null) callback.onReceivingFinished(metadata.sender);
             }
         } catch (IOException e) {
             System.err.println("Receiver error: " + e.getMessage());
-            if (callback != null) {
-                callback.onReceivingFailed(e);
+            if (callback != null) callback.onReceivingFailed(e);
+        } finally {
+            try {
+                if (serverSocket != null && !serverSocket.isClosed()) serverSocket.close();
+            } catch (IOException ignored) {
             }
         }
     }
 
+    /**
+     * Stops the receiver and unblocks any waiting operations.
+     */
     public void stop() {
         running = false;
+        try {
+            if (serverSocket != null && !serverSocket.isClosed()) {
+                serverSocket.close(); // unblocks accept()
+            }
+        } catch (IOException e) {
+            System.err.println("Error while closing server socket: " + e.getMessage());
+        }
     }
 
     /**
-     * Adds a callback-method that is called as soon as a file is received.
+     * Sets a callback method that is called as soon as a file is received.
      *
      * @param callback the callback method
      * @see FileReceivingEventHandler
@@ -136,4 +166,3 @@ public class FileReceiver implements Runnable {
         return receivedLog;
     }
 }
-

@@ -1,5 +1,10 @@
 package org.deg.utils;
 
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+
 public class Utils {
     /**
      * Converts a byte count into a human-readable string using binary prefixes.
@@ -37,5 +42,19 @@ public class Utils {
         }
 
         return String.format("%.1f %s", size, units[unitIndex]);
+    }
+
+    public static void sendUDPBroadcast(String message, int port) {
+        try (DatagramSocket sendSocket = new DatagramSocket()) {
+            sendSocket.setBroadcast(true);
+            byte[] data = message.getBytes();
+            DatagramPacket packet = new DatagramPacket(
+                    data, data.length,
+                    InetAddress.getByName("255.255.255.255"), port
+            );
+            sendSocket.send(packet);
+        } catch (IOException e) {
+            System.err.println("Failed to send message: " + e.getMessage());
+        }
     }
 }
