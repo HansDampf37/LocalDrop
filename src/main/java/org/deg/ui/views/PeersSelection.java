@@ -5,6 +5,7 @@ import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
@@ -118,6 +119,7 @@ public class PeersSelection extends VBox {
                         @Override
                         public void onFinished(List<FileWithMetadata> files, Peer receiver) {
                             Platform.runLater(() -> {
+                                peerView.onTransmissionStop();
                                 long failCount = files.stream().filter(f -> !f.transmissionSuccess).count();
                                 long successCount = files.stream().filter(f -> f.transmissionSuccess).count();
                                 ToastMode toastMode;
@@ -166,6 +168,7 @@ public class PeersSelection extends VBox {
                         peerView.onTransmissionRequested();
                         backend.startFilesTransfer(backend.localPeer, peer, filesToSend, callback);
                     });
+                    setPadding(new Insets(0));
                     setGraphic(peerView);
                 }
             }

@@ -10,6 +10,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
+import org.deg.core.Peer;
 import org.deg.core.callbacks.Progress;
 
 
@@ -21,7 +22,7 @@ public class PeerCell extends HBox {
     private final ProgressIndicator spinner = new ProgressIndicator();
 
 
-    public PeerCell(org.deg.core.Peer peer) {
+    public PeerCell(Peer peer) {
         setPadding(new Insets(10));
         setSpacing(20);
         setAlignment(Pos.CENTER_LEFT);
