@@ -98,7 +98,7 @@ public class FileReceiver implements Runnable {
                             try {
                                 file.createNewFile();
                             } catch (IOException e) {
-                                callback.onReceivingFailed(e);
+                                callback.onReceivingFailed(e, false);
                                 continue;
                             }
                         }
@@ -132,12 +132,12 @@ public class FileReceiver implements Runnable {
 
                 } catch (IOException e) {
                     System.err.println("Error during file reception: " + e.getMessage());
-                    if (callback != null) callback.onReceivingFailed(e);
+                    if (callback != null) callback.onReceivingFailed(e, true);
                 }
             }
         } catch (IOException e) {
             System.err.println("Receiver error: " + e.getMessage());
-            if (callback != null) callback.onReceivingFailed(e);
+            if (callback != null) callback.onReceivingFailed(e, true);
         } finally {
             try {
                 if (serverSocket != null && !serverSocket.isClosed()) serverSocket.close();

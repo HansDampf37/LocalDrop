@@ -64,10 +64,14 @@ public class FileReceivingHandler implements FileReceivingEventHandler {
     }
 
     @Override
-    public void onReceivingFailed(Exception e) {
-        Platform.runLater(() -> Toast.show(receivePopup, e.getMessage(), 3000, ToastMode.ERROR));
+    public void onReceivingFailed(Exception e, boolean cancelReceiving) {
+        if (!cancelReceiving) {
+            Platform.runLater(() -> Toast.show(receivePopup, e.getMessage(), 3000, ToastMode.ERROR));
+        } else {
+            receivePopup.close();
+            if (onFailed != null) onFailed.accept(e);
+        }
         e.printStackTrace();
-        if (onFailed != null) onFailed.accept(e);
     }
 
     public void setOnFailed(Consumer<Exception> onFailed) {

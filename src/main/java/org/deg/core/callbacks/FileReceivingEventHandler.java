@@ -41,5 +41,5 @@ public interface FileReceivingEventHandler {
      * Is called whenever the transmission failed
      * @param e the exception that caused the failure
      */
-    void onReceivingFailed(Exception e);
+    void onReceivingFailed(Exception e, boolean cancelReceiving);
 }

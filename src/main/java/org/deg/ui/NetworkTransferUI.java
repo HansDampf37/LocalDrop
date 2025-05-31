@@ -1,6 +1,7 @@
 package org.deg.ui;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -12,6 +13,7 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.deg.backend.Backend;
+import org.deg.backend.UserConfigurations;
 import org.deg.ui.components.NavButton;
 import org.deg.ui.components.Toast;
 import org.deg.ui.components.ToastMode;
@@ -51,8 +53,8 @@ public class NetworkTransferUI extends Application {
             backend.stop();
             System.exit(0);
         });
-        fileReceivingHandler.setOnFailed(exception -> Toast.show(primaryStage, exception.getMessage(), 3000, ToastMode.ERROR));
-        fileReceivingHandler.setOnFinished(peer -> Toast.show(primaryStage, "Files by " + peer.name() + " have been received.", 3000, ToastMode.SUCCESS));
+        fileReceivingHandler.setOnFailed(exception -> Platform.runLater(() -> Toast.show(primaryStage, exception.getMessage(), 3000, ToastMode.ERROR)));
+        fileReceivingHandler.setOnFinished(peer -> Platform.runLater(() -> Toast.show(primaryStage, "Files by " + peer.name() + " have been stored to " + UserConfigurations.DEFAULT_SAFE_PATH.getAbsolutePath(), 3000, ToastMode.SUCCESS)));
 
         BorderPane borderPane = new BorderPane();
         VBox navBar = createNavBar();
