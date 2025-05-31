@@ -4,10 +4,7 @@ import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.Tooltip;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -21,9 +18,12 @@ import org.deg.backend.UserConfigurations;
 import org.deg.core.FileWithMetadata;
 import org.deg.core.Peer;
 import org.deg.core.callbacks.Progress;
+import org.deg.ui.components.FileCell;
 import org.deg.ui.components.FileSendingProgressBar;
 import org.deg.utils.Utils;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -51,8 +51,23 @@ public class ReceivePopup extends Stage {
         Circle clip = new Circle(100, 100, 100);
         profilePic.setClip(clip);
 
-        ListView<String> receivedFiles = new ListView<>();
-        receivedFiles.setItems(FXCollections.observableList(files.stream().map(FileWithMetadata::relativePath).collect(Collectors.toList())));
+        ListView<FileWithMetadata> receivedFiles = new ListView<>();
+        receivedFiles.setItems(FXCollections.observableList(files));
+        receivedFiles.setCellFactory(lv -> new ListCell<>() {
+            @Override
+            protected void updateItem(FileWithMetadata item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty && item != null && item.file() != null) {
+                    FileCell fileCell = new FileCell(item.file().getName(), item.sizeInBytes());
+                    fileCell.prefWidthProperty().bind(lv.widthProperty().subtract(40));
+                    setGraphic(fileCell);
+                    setText(null);
+                } else {
+                    setGraphic(null);
+                    setText(null);
+                }
+            }
+        });
         int numberOfFiles = files.size();
         long numberOfBytes = files.stream().mapToLong(FileWithMetadata::sizeInBytes).sum();
         Label details = new Label(numberOfFiles + " files, " + Utils.bytesToReadableString(numberOfBytes));

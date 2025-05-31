@@ -114,10 +114,10 @@ public class Backend {
         executor.submit(() -> {
             try {
                 new FileSender(sender, receiver, filesToSend).send(handler);
+                for (File file : filesToSend) sentLog.add(new Pair<>(receiver, file));
             } catch (SendingDeniedException e) {
                 System.out.println("Sending denied");
             }
-            for (File file : filesToSend) sentLog.add(new Pair<>(receiver, file));
         });
     }
 
