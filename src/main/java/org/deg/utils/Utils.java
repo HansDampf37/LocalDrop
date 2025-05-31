@@ -34,6 +34,21 @@ public class Utils {
         return getStringWithUnits(bitsPerSecond, units);
     }
 
+    public static String secondsToReadableTime(float seconds) {
+        int totalSeconds = Math.round(seconds);
+        int hours = totalSeconds / 3600;
+        int minutes = (totalSeconds % 3600) / 60;
+        int remainingSeconds = totalSeconds % 60;
+
+        if (hours > 0) {
+            return String.format("%d h %02d min %02d s", hours, minutes, remainingSeconds);
+        } else if (minutes > 0) {
+            return String.format("%d min %02d s", minutes, remainingSeconds);
+        } else {
+            return String.format("%d s", remainingSeconds);
+        }
+    }
+
     private static String getStringWithUnits(long bitsPerSecond, String[] units) {
         double size = bitsPerSecond;
         int unitIndex = -1;

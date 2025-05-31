@@ -10,6 +10,7 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
 
 import static org.deg.core.Constants.ACCEPT_TRANSMISSION_REQUEST;
 import static org.deg.core.Constants.DENY_TRANSMISSION_REQUEST;
@@ -87,7 +88,7 @@ public class FileReceiver implements Runnable {
                     int totalBytesReceived = 0;
                     long startTime = System.currentTimeMillis();
                     long totalBytes = metadata.fileSizes.stream().mapToLong(Long::longValue).sum();
-
+                    DataInputStream compressedDataInputStream = new DataInputStream(new GZIPInputStream(socket.getInputStream()));
                     for (int i = 0; i < outputFiles.size(); i++) {
                         long fileSize = metadata.fileSizes.get(i);
                         FileWithMetadata outputFile = outputFiles.get(i);
@@ -106,7 +107,7 @@ public class FileReceiver implements Runnable {
                             byte[] buffer = new byte[4096];
                             long remaining = fileSize;
                             int bytesRead;
-                            while (remaining > 0 && (bytesRead = dis.read(buffer, 0, (int) Math.min(buffer.length, remaining))) != -1) {
+                            while (remaining > 0 && (bytesRead = compressedDataInputStream.read(buffer, 0, (int) Math.min(buffer.length, remaining))) != -1) {
                                 fos.write(buffer, 0, bytesRead);
                                 remaining -= bytesRead;
                                 totalBytesReceived += bytesRead;

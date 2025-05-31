@@ -43,4 +43,8 @@ public class Progress {
     public float totalProgress() {
         return (float)((double) bytesTransmitted / (double) totalBytes);
     }
+
+    public float remainingSecondsEstimation() {
+        return (totalBytes - bytesTransmitted) / ((this.bitsPerSecondEstimation + 1) / 8f);
+    }
 }
