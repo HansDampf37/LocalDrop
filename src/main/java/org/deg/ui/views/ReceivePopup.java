@@ -22,12 +22,9 @@ import org.deg.ui.components.FileCell;
 import org.deg.ui.components.FileSendingProgressBar;
 import org.deg.utils.Utils;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 public class ReceivePopup extends Stage {
     private final FileSendingProgressBar progressBar = new FileSendingProgressBar(false);

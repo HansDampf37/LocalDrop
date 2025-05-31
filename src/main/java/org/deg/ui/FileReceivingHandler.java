@@ -12,9 +12,12 @@ import org.deg.ui.views.ReceivePopup;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Consumer;
 
 public class FileReceivingHandler implements FileReceivingEventHandler {
     private ReceivePopup receivePopup = null;
+    private Consumer<Exception> onFailed = null;
+    private Consumer<Peer> onFinished = null;
 
     @Override
     public boolean onIncomingFiles(List<FileWithMetadata> files, Peer sender) {
@@ -57,11 +60,21 @@ public class FileReceivingHandler implements FileReceivingEventHandler {
                 receivePopup = null;
             });
         }
+        if (onFinished != null) onFinished.accept(sender);
     }
 
     @Override
     public void onReceivingFailed(Exception e) {
         Platform.runLater(() -> Toast.show(receivePopup, e.getMessage(), 3000, ToastMode.ERROR));
         e.printStackTrace();
+        if (onFailed != null) onFailed.accept(e);
+    }
+
+    public void setOnFailed(Consumer<Exception> onFailed) {
+        this.onFailed = onFailed;
+    }
+
+    public void setOnFinished(Consumer<Peer> onFinished) {
+        this.onFinished = onFinished;
     }
 }
