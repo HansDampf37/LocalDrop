@@ -5,7 +5,10 @@ import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -13,6 +16,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.deg.backend.Backend;
+import org.deg.core.FileWithMetadata;
 import org.deg.core.Peer;
 import org.deg.core.callbacks.FileSendingEventHandler;
 import org.deg.core.callbacks.Progress;
@@ -112,16 +116,25 @@ public class PeersSelection extends VBox {
                         }
 
                         @Override
-                        public void onFinished(File file, Peer receiver) {
-                        }
-
-                        @Override
-                        public void onFinished(Peer receiver) {
+                        public void onFinished(List<FileWithMetadata> files, Peer receiver) {
                             Platform.runLater(() -> {
-                                String message = "Transmission to " + receiver.name() + " is complete";
+                                long failCount = files.stream().filter(f -> !f.transmissionSuccess).count();
+                                long successCount = files.stream().filter(f -> f.transmissionSuccess).count();
+                                ToastMode toastMode;
+                                String message;
+                                if (successCount > 0 && failCount == 0) {
+                                    toastMode = ToastMode.SUCCESS;
+                                    message = "Successfully sent " + successCount + " file(s) to '" + receiver.name();
+                                } else if (successCount == 0 && failCount > 0) {
+                                    toastMode = ToastMode.ERROR;
+                                    message = "Failed to sent " + successCount + " file(s) to " + receiver.name();
+                                } else {
+                                    toastMode = ToastMode.ERROR;
+                                    message = "Successfully sent " + successCount + " file(s) to '" + receiver.name() +
+                                            "\nFailed to sent " + successCount + " file(s) to " + receiver.name();
+                                }
                                 Stage stage = (Stage) getScene().getWindow();
-                                Toast.show(stage, message, 3000, ToastMode.SUCCESS);
-                                peerView.onTransmissionStop();
+                                Toast.show(stage, message, 4000, toastMode);
                             });
                         }
 

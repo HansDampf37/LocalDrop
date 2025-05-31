@@ -1,8 +1,9 @@
 package org.deg.core.callbacks;
 
+import org.deg.core.FileWithMetadata;
 import org.deg.core.Peer;
 
-import java.io.File;
+import java.util.List;
 
 /**
  * Interface that is used to report the progress when sending a file over a tcp connection
@@ -15,13 +16,6 @@ public interface FileSendingEventHandler {
     void onSendingProgress(Progress progress);
 
     /**
-     * Is called when the file was successfully transmitted
-     * @param file the file
-     * @param receiver the receiving peer
-     */
-    void onFinished(File file, Peer receiver);
-
-    /**
      * Is called whenever the transmission of the file failed
      * @param e the exception that caused the failure
      */
@@ -29,9 +23,10 @@ public interface FileSendingEventHandler {
 
     /**
      * Is called when ALL files were successfully transmitted
+     * @param files the list of files to send
      * @param receiver the receiving peer
      */
-    void onFinished(Peer receiver);
+    void onFinished(List<FileWithMetadata> files, Peer receiver);
 
     /**
      * Is called when the receiver denies the transmission request

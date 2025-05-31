@@ -2,6 +2,8 @@ package org.deg.core.callbacks;
 
 import org.deg.core.FileWithMetadata;
 
+import java.util.List;
+
 /**
  * The Progress while sending a list of files to another peer
  */
@@ -9,7 +11,7 @@ public class Progress {
     /**
      * The file that is currently being transmitted
      */
-    public FileWithMetadata currentFile;
+    public List<FileWithMetadata> files;
     /**
      * The number of bytes that have been transmitted
      */
@@ -31,8 +33,8 @@ public class Progress {
      */
     public long bitsPerSecondEstimation;
 
-    public Progress(FileWithMetadata file, long bytesTransmitted, long totalBytes, int filesTransmitted, int totalFiles) {
-        this.currentFile = file;
+    public Progress(List<FileWithMetadata> files, long bytesTransmitted, long totalBytes, int filesTransmitted, int totalFiles) {
+        this.files = files;
         this.bytesTransmitted = bytesTransmitted;
         this.totalBytes = totalBytes;
         this.filesTransmitted = filesTransmitted;

@@ -66,8 +66,8 @@ public class FileSender {
         System.out.println("Send transmission request to " + receiver.name());
         Metadata metadata = new Metadata(
                 files.size(),
-                files.stream().map(FileWithMetadata::relativePath).toList(),
-                files.stream().map(FileWithMetadata::sizeInBytes).toList(),
+                files.stream().map(f -> f.relativePath).toList(),
+                files.stream().map(f ->f.sizeInBytes).toList(),
                 sender
         );
         String metadataStr = MetadataHandler.buildMetadata(metadata);
@@ -95,16 +95,16 @@ public class FileSender {
      * @throws IOException if an I/ O error occurs when creating the output stream or if the socket is not connected.
      */
     private void sendContent(Socket receiverSocket, FileSendingEventHandler callback) throws IOException {
-        int i = 0;
         int totalBytesSent = 0;
         long startTime = System.currentTimeMillis();
-        long totalBytes = files.stream().mapToLong(FileWithMetadata::sizeInBytes).sum();
+        long totalBytes = files.stream().mapToLong(f -> f.sizeInBytes).sum();
         try (
                 GZIPOutputStream gzipOut = new GZIPOutputStream(receiverSocket.getOutputStream());
                 DataOutputStream compressedDataOutputStream = new DataOutputStream(gzipOut)
         ) {
-            for (File file : files.stream().map(FileWithMetadata::file).toList()) {
-                try (FileInputStream fis = new FileInputStream(file)) {
+            for (int i = 0; i < files.size(); i++) {
+                FileWithMetadata fileWithMetadata = files.get(i);
+                try (FileInputStream fis = new FileInputStream(fileWithMetadata.file)) {
                     byte[] buffer = new byte[4096];
                     int bytesRead;
                     while ((bytesRead = fis.read(buffer)) != -1) {
@@ -112,22 +112,23 @@ public class FileSender {
                         totalBytesSent += bytesRead;
 
                         if (callback != null) {
-                            Progress progress = new Progress(files.get(i), totalBytesSent, totalBytes, i, files.size());
+                            Progress progress = new Progress(files, totalBytesSent, totalBytes, i, files.size());
                             long durationSoFar = System.currentTimeMillis() - startTime;
                             float totalTimeInSeconds = durationSoFar / 1000f;
                             progress.bitsPerSecondEstimation = (long) (totalBytesSent * 8L / totalTimeInSeconds);
                             callback.onSendingProgress(progress);
                         }
                     }
-                    i++;
+                    System.out.println(fileWithMetadata.relativePath + " sending finished successfully.");
+                    fileWithMetadata.transmissionSuccess = true;
+                } catch (IOException e) {
+                    fileWithMetadata.transmissionSuccess = false;
                 }
-                System.out.println(file.getName() + " sending finished successfully.");
-                if (callback != null) callback.onFinished(file, receiver);
             }
             compressedDataOutputStream.flush();
             gzipOut.finish();
         }
         System.out.println("All Files sending finished successfully.");
-        if (callback != null) callback.onFinished(receiver);
+        if (callback != null) callback.onFinished(files, receiver);
     }
 }

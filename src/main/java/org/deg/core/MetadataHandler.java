@@ -1,11 +1,14 @@
 package org.deg.core;
 
+import org.deg.backend.UserConfigurations;
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 /**
- * Utility class for creating and parsing file metadata strings
+ * Utility class for creating and parsing metadata objects
  * used in file transfer over the network.
  */
 public class MetadataHandler {
@@ -83,5 +86,17 @@ public class MetadataHandler {
                 "|SENDER_NAME:" + metadata.sender.name() +
                 "|SENDER_IP:" + metadata.sender.ip() +
                 "|SENDER_PORT:" + metadata.sender.fileTransferPort();
+    }
+
+    public static List<FileWithMetadata> buildFilesWithMetadataList(Metadata metadata) {
+        List<FileWithMetadata> receivedFiles = new ArrayList<>();
+        for (int i = 0; i < metadata.fileCount; i++) {
+            String name = metadata.fileNames.get(i);
+            File file = new File(UserConfigurations.DEFAULT_SAFE_PATH, name);
+            long size = metadata.fileSizes.get(i);
+            FileWithMetadata fileWithMetadata = new FileWithMetadata(file, name, size, null);
+            receivedFiles.add(fileWithMetadata);
+        }
+        return receivedFiles;
     }
 }

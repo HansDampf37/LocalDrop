@@ -44,7 +44,7 @@ public class Backend {
         int fileTransferPort = findFreePort();
 
         localPeer = new Peer(peerName, localIp, fileTransferPort);
-        fileReceiver = new FileReceiver(fileTransferPort, UserConfigurations.DEFAULT_SAFE_PATH);
+        fileReceiver = new FileReceiver(fileTransferPort);
         discoveryListener = new DiscoveryListener(localPeer);
         helloListener = new HelloListener(localPeer, null, null);
     }

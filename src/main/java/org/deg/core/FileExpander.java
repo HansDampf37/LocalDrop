@@ -18,7 +18,7 @@ public class FileExpander {
             if (file.isDirectory()) {
                 result.addAll(getFilesRecursively(file, file));
             } else {
-                result.add(new FileWithMetadata(file, file.getName(), file.length()));
+                result.add(new FileWithMetadata(file, file.getName(), file.length(), null));
             }
         }
         return result;
@@ -33,7 +33,7 @@ public class FileExpander {
                     files.addAll(getFilesRecursively(rootDir, file));
                 } else {
                     String relativePath = rootDir.getName() + File.separator + rootDir.toPath().relativize(file.toPath());
-                    files.add(new FileWithMetadata(file, relativePath, file.length()));
+                    files.add(new FileWithMetadata(file, relativePath, file.length(), null));
                 }
             }
         }

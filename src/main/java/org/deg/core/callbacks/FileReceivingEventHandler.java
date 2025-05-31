@@ -25,21 +25,15 @@ public interface FileReceivingEventHandler {
     void onReceivingProgress(Progress progress);
 
     /**
-     * Is called when a file was successfully transmitted
-     * @param file the file
+     * Is called when all files were transmitted
      * @param sender the sending peer
+     * @param files the transmitted files
      */
-    void onReceivingFinished(FileWithMetadata file, Peer sender);
-
-    /**
-     * Is called when ALL files were successfully transmitted
-     * @param sender the sending peer
-     */
-    void onReceivingFinished(Peer sender);
+    void onReceivingFinished(List<FileWithMetadata> files, Peer sender);
 
     /**
      * Is called whenever the transmission failed
      * @param e the exception that caused the failure
      */
-    void onReceivingFailed(Exception e, boolean cancelReceiving);
+    void onReceivingError(Exception e);
 }

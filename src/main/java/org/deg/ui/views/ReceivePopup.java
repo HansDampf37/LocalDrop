@@ -48,25 +48,9 @@ public class ReceivePopup extends Stage {
         Circle clip = new Circle(100, 100, 100);
         profilePic.setClip(clip);
 
-        ListView<FileWithMetadata> receivedFiles = new ListView<>();
-        receivedFiles.setItems(FXCollections.observableList(files));
-        receivedFiles.setCellFactory(lv -> new ListCell<>() {
-            @Override
-            protected void updateItem(FileWithMetadata item, boolean empty) {
-                super.updateItem(item, empty);
-                if (!empty && item != null && item.file() != null) {
-                    FileCell fileCell = new FileCell(item.file().getName(), item.sizeInBytes());
-                    fileCell.prefWidthProperty().bind(lv.widthProperty().subtract(40));
-                    setGraphic(fileCell);
-                    setText(null);
-                } else {
-                    setGraphic(null);
-                    setText(null);
-                }
-            }
-        });
+        ListView<FileWithMetadata> receivedFiles = getFileListView(files);
         int numberOfFiles = files.size();
-        long numberOfBytes = files.stream().mapToLong(FileWithMetadata::sizeInBytes).sum();
+        long numberOfBytes = files.stream().mapToLong(f -> f.sizeInBytes).sum();
         Label details = new Label(numberOfFiles + " files, " + Utils.bytesToReadableString(numberOfBytes));
 
         HBox.setHgrow(progressBar, Priority.ALWAYS);
@@ -100,7 +84,28 @@ public class ReceivePopup extends Stage {
         setScene(scene);
     }
 
-    public void onReceivingProgress(Progress progress) {
+    private static ListView<FileWithMetadata> getFileListView(List<FileWithMetadata> files) {
+        ListView<FileWithMetadata> receivedFiles = new ListView<>();
+        receivedFiles.setItems(FXCollections.observableList(files));
+        receivedFiles.setCellFactory(lv -> new ListCell<>() {
+            @Override
+            protected void updateItem(FileWithMetadata item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty && item != null && item.file != null) {
+                    FileCell fileCell = new FileCell(item.file.getName(), item.sizeInBytes);
+                    fileCell.prefWidthProperty().bind(lv.widthProperty().subtract(40));
+                    setGraphic(fileCell);
+                    setText(null);
+                } else {
+                    setGraphic(null);
+                    setText(null);
+                }
+            }
+        });
+        return receivedFiles;
+    }
+
+    public void updateProgress(Progress progress) {
         progressBar.setProgress(progress);
     }
 }

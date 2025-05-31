@@ -27,7 +27,6 @@ import java.util.Objects;
 
 public class NetworkTransferUI extends Application {
     private final Backend backend = new Backend();
-    private final FileReceivingHandler fileReceivingHandler = new FileReceivingHandler();
 
     private StackPane mainContent;
     private Pane receiveView;
@@ -39,7 +38,6 @@ public class NetworkTransferUI extends Application {
 
     public NetworkTransferUI() throws IOException {
         backend.start();
-        backend.setFileReceivedHandler(fileReceivingHandler);
     }
 
     public static void main(String[] args) {
@@ -53,8 +51,7 @@ public class NetworkTransferUI extends Application {
             backend.stop();
             System.exit(0);
         });
-        fileReceivingHandler.setOnFailed(exception -> Platform.runLater(() -> Toast.show(primaryStage, exception.getMessage(), 3000, ToastMode.ERROR)));
-        fileReceivingHandler.setOnFinished(peer -> Platform.runLater(() -> Toast.show(primaryStage, "Files by " + peer.name() + " have been stored to " + UserConfigurations.DEFAULT_SAFE_PATH.getAbsolutePath(), 3000, ToastMode.SUCCESS)));
+        backend.setFileReceivedHandler(new FileReceivingHandler(primaryStage));
 
         BorderPane borderPane = new BorderPane();
         VBox navBar = createNavBar();
