@@ -1,7 +1,6 @@
 package org.deg.ui;
 
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -10,13 +9,12 @@ import javafx.scene.control.ContentDisplay;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.deg.backend.Backend;
-import org.deg.backend.UserConfigurations;
+import org.deg.ui.components.Logo;
 import org.deg.ui.components.NavButton;
-import org.deg.ui.components.Toast;
-import org.deg.ui.components.ToastMode;
 import org.deg.ui.views.LogView;
 import org.deg.ui.views.ReceiveView;
 import org.deg.ui.views.SendView;
@@ -66,6 +64,7 @@ public class NetworkTransferUI extends Application {
         StackPane root = new StackPane(borderPane);
 
         Scene scene = new Scene(root, 800, 600);
+        Font.loadFont(getClass().getResourceAsStream("/fonts/NotoNaskhArabic[wght].ttf"), 30);
         scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/styles.css")).toExternalForm());
 
         primaryStage.setScene(scene);
@@ -103,7 +102,7 @@ public class NetworkTransferUI extends Application {
         VBox gap = new VBox();
         VBox.setVgrow(gap, Priority.ALWAYS);
 
-        navBar.getChildren().addAll(btnReceive, btnSend, btnLogs, gap, btnSettings);
+        navBar.getChildren().addAll(new Logo(), btnReceive, btnSend, btnLogs, gap, btnSettings);
         return navBar;
     }
 
