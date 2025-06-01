@@ -22,7 +22,7 @@ public record Peer(String name, String ip, int fileTransferPort, String profileP
      * @return A string in the format "DISCOVERY_RESPONSE|name|ip|fileTransferPort".
      */
     public String toDiscoveryResponse() {
-        return DISCOVERY_RESPONSE + "|" + name + "|" + ip + "|" + fileTransferPort;
+        return DISCOVERY_RESPONSE + "|" + name + "|" + ip + "|" + fileTransferPort + "|" + profilePicName;
     }
 
     /**
