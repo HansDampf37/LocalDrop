@@ -29,6 +29,7 @@ public class MetadataHandler {
         String senderName = "UnknownSenderName";
         String senderIP = "UnknownSenderIP";
         int senderPort = -1;
+        String profilePicName = "UnknownProfilePicName";
 
         for (String part : parts) {
             String[] keyVal = part.split(":", 2);
@@ -55,11 +56,14 @@ public class MetadataHandler {
                     case "SENDER_PORT":
                         senderPort = Integer.parseInt(keyVal[1]);
                         break;
+                    case "SENDER_PROFILE_PIC_NAME":
+                        profilePicName = keyVal[1];
+                        break;
                 }
             }
         }
 
-        return new Metadata(fileCount, fileNames, fileSizes, new Peer(senderName, senderIP, senderPort));
+        return new Metadata(fileCount, fileNames, fileSizes, new Peer(senderName, senderIP, senderPort, profilePicName));
     }
 
     /**
@@ -85,7 +89,8 @@ public class MetadataHandler {
                 "|SIZES:" + fileSizesStr +
                 "|SENDER_NAME:" + metadata.sender.name() +
                 "|SENDER_IP:" + metadata.sender.ip() +
-                "|SENDER_PORT:" + metadata.sender.fileTransferPort();
+                "|SENDER_PORT:" + metadata.sender.fileTransferPort() +
+                "|SENDER_PROFILE_PIC_NAME:" + metadata.sender.profilePicName();
     }
 
     public static List<FileWithMetadata> buildFilesWithMetadataList(Metadata metadata) {

@@ -43,7 +43,7 @@ public class Backend {
         String localIp = findLanAddress();
         int fileTransferPort = findFreePort();
 
-        localPeer = new Peer(peerName, localIp, fileTransferPort);
+        localPeer = new Peer(peerName, localIp, fileTransferPort, UserConfigurations.PROFILE_PICTURE_NAME);
         fileReceiver = new FileReceiver(fileTransferPort);
         discoveryListener = new DiscoveryListener(localPeer);
         helloListener = new HelloListener(localPeer, null, null);

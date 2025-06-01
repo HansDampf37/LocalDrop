@@ -6,7 +6,10 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
+import org.deg.backend.UserConfigurations;
 import org.deg.core.Peer;
+
+import java.util.Objects;
 
 public class ReceiveView extends VBox {
     public ReceiveView(Peer localPeer) {
@@ -15,7 +18,7 @@ public class ReceiveView extends VBox {
 
         Label visibleAsLabel = new Label("You are visible as:");
 
-        ImageView profilePic = new ImageView(new Image("https://picsum.photos/200"));
+        ImageView profilePic = new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/profile-pictures/" + UserConfigurations.PROFILE_PICTURE_NAME)).toExternalForm()));
         profilePic.setFitWidth(200);
         profilePic.setFitHeight(200);
         Circle clip = new Circle(100, 100, 100);

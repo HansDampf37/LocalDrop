@@ -13,6 +13,8 @@ import javafx.scene.shape.Circle;
 import org.deg.core.Peer;
 import org.deg.core.callbacks.Progress;
 
+import java.util.Objects;
+
 
 /**
  * View of a peer in the peer-list. Can be configured to display progress regarding the sending progress.
@@ -27,7 +29,7 @@ public class PeerCell extends HBox {
         setSpacing(20);
         setAlignment(Pos.CENTER_LEFT);
 
-        ImageView avatar = new ImageView(new Image("https://picsum.photos/200"));
+        ImageView avatar = new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/profile-pictures/" + peer.profilePicName())).toExternalForm()));
         avatar.setFitWidth(40);
         avatar.setFitHeight(40);
         Circle clip = new Circle(20, 20, 20);

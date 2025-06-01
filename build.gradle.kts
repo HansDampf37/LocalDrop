@@ -21,15 +21,14 @@ application {
 }
 
 jlink {
-    imageName.set("NetworkTransferUI")
+    imageName.set("LocalDrop")
 
     launcher {
-        name = "network-transfer-ui"
+        name = "localdrop"
     }
 
     jpackage {
-        installerName = "NetworkTransferInstaller"
+        installerName = "LocalDropInstaller"
         appVersion = "1.0.0"
-        // installerType = "exe" // Uncomment and set according to your platform
     }
 }

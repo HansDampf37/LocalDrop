@@ -42,7 +42,7 @@ public class ReceivePopup extends Stage {
         Label nameBox = new Label(sender.name());
         nameBox.getStyleClass().add("nameLabel");
 
-        ImageView profilePic = new ImageView(new Image("https://picsum.photos/200"));
+        ImageView profilePic = new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/profile-pictures/" + sender.profilePicName())).toExternalForm()));
         profilePic.setFitWidth(200);
         profilePic.setFitHeight(200);
         Circle clip = new Circle(100, 100, 100);

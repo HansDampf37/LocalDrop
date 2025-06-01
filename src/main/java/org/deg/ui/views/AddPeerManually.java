@@ -15,6 +15,8 @@ import org.deg.ui.components.TextFieldWithName;
 import java.util.List;
 import java.util.Objects;
 
+import static org.deg.backend.UserConfigurations.getRandomProfilePicture;
+
 public class AddPeerManually extends Stage {
     private final List<Peer> listToAddTo;
 
@@ -63,7 +65,7 @@ public class AddPeerManually extends Stage {
                 ipInput.inputField.getStyleClass().remove("wrongInput");
             }
             try {
-                listToAddTo.add(new Peer(name, ip, Integer.parseInt(port)));
+                listToAddTo.add(new Peer(name, ip, Integer.parseInt(port), getRandomProfilePicture()));
                 portInput.inputField.getStyleClass().remove("wrongInput");
                 if (success) this.close();
             } catch (NumberFormatException e) {

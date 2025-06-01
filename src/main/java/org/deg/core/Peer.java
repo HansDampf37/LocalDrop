@@ -6,7 +6,7 @@ import static org.deg.core.Constants.*;
  * Represents a peer in the LAN with a unique name and file transfer port.
  * A peer also has a receiver and can be exposed via a discovery listener.
  */
-public record Peer(String name, String ip, int fileTransferPort) {
+public record Peer(String name, String ip, int fileTransferPort, String profilePicName) {
 
     /**
      * Returns a string representation of the peer (name, IP, and port).
@@ -31,7 +31,7 @@ public record Peer(String name, String ip, int fileTransferPort) {
      * @return A string in the format "HELLO|name|ip|fileTransferPort".
      */
     public String toHelloMessage() {
-        return HELLO + "|" + name + "|" + ip + "|" + fileTransferPort;
+        return HELLO + "|" + name + "|" + ip + "|" + fileTransferPort + "|" + profilePicName;
     }
 
     /**
@@ -40,7 +40,7 @@ public record Peer(String name, String ip, int fileTransferPort) {
      * @return A string in the format "BYE|name|ip|fileTransferPort".
      */
     public String toByeMessage() {
-        return BYE + "|" + name + "|" + ip + "|" + fileTransferPort;
+        return BYE + "|" + name + "|" + ip + "|" + fileTransferPort + "|" + profilePicName;
     }
 
     /**
@@ -51,11 +51,12 @@ public record Peer(String name, String ip, int fileTransferPort) {
      */
     public static Peer fromDiscoveryResponse(String response) {
         String[] parts = response.split("\\|");
-        if (parts.length == 4) {
+        if (parts.length == 5) {
             String name = parts[1];
             String ip = parts[2];
             int port = Integer.parseInt(parts[3]);
-            return new Peer(name, ip, port);
+            String profilePicName = parts[4];
+            return new Peer(name, ip, port, profilePicName);
         }
         return null;
     }
