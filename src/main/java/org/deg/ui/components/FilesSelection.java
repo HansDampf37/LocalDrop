@@ -129,6 +129,8 @@ public class FilesSelection extends VBox {
             }
         });
         HBox.setHgrow(fileList, Priority.ALWAYS);
+
+        // Delete key removes selection
         fileList.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.DELETE) {
                 File selectedFile = fileList.getSelectionModel().getSelectedItem();
@@ -137,6 +139,26 @@ public class FilesSelection extends VBox {
                 }
             }
         });
+
+        // Allow dragging files into the list
+        fileList.setOnDragOver(event -> {
+            if (event.getDragboard().hasFiles()) {
+                event.acceptTransferModes(javafx.scene.input.TransferMode.COPY);
+            }
+            event.consume();
+        });
+
+        fileList.setOnDragDropped(event -> {
+            var db = event.getDragboard();
+            boolean success = false;
+            if (db.hasFiles()) {
+                success = true;
+                filesToSend.addAll(db.getFiles());
+            }
+            event.setDropCompleted(success);
+            event.consume();
+        });
+
         return fileList;
     }
 }

@@ -19,7 +19,6 @@ public class ProfilePictureSelector extends VBox {
     private static final int IMAGE_SIZE = 50;
     private final TilePane tilePane = new TilePane();
     private StackPane selectedPane = null;
-    private String selectedImageName = null;
     private Consumer<String> onSelectedCallback = null;
 
     public ProfilePictureSelector() {
@@ -81,10 +80,9 @@ public class ProfilePictureSelector extends VBox {
             selectedPane.getStyleClass().remove("selected");
         }
         selectedPane = pane;
-        selectedImageName = imageName;
         pane.getStyleClass().add("selected");
         UserConfigurations.saveConfigurations();
-        if (onSelectedCallback != null) onSelectedCallback.accept(selectedImageName);
+        if (onSelectedCallback != null) onSelectedCallback.accept(imageName);
     }
 
     public void onImageSelected(Consumer<String> callback) {
