@@ -5,9 +5,7 @@ import javafx.geometry.Pos;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.TilePane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import org.deg.backend.UserConfigurations;
 
 import java.net.URL;
@@ -22,7 +20,7 @@ public class ProfilePictureSelector extends VBox {
     private final TilePane tilePane = new TilePane();
     private StackPane selectedPane = null;
     private String selectedImageName = null;
-    private Consumer<Path> onSelectedCallback = null;
+    private Consumer<String> onSelectedCallback = null;
 
     public ProfilePictureSelector() {
         setSpacing(10);
@@ -64,12 +62,12 @@ public class ProfilePictureSelector extends VBox {
                 imageContainer.setPadding(new Insets(0));
                 imageContainer.getStyleClass().add("profilePicture");
 
-                imageContainer.setOnMouseClicked(e -> selectImage(imageContainer, path));
+                imageContainer.setOnMouseClicked(e -> selectImage(imageContainer, filename));
 
                 tilePane.getChildren().add(imageContainer);
 
                 if (filename.equals(UserConfigurations.PROFILE_PICTURE_NAME)) {
-                    selectImage(imageContainer, path);
+                    selectImage(imageContainer, filename);
                 }
             }
 
@@ -78,24 +76,18 @@ public class ProfilePictureSelector extends VBox {
         }
     }
 
-    private void selectImage(StackPane pane, Path imagePath) {
+    private void selectImage(StackPane pane, String imageName) {
         if (selectedPane != null) {
             selectedPane.getStyleClass().remove("selected");
         }
         selectedPane = pane;
-        selectedImageName = imagePath.getFileName().toString();
+        selectedImageName = imageName;
         pane.getStyleClass().add("selected");
-        if (onSelectedCallback != null) onSelectedCallback.accept(imagePath);
+        UserConfigurations.saveConfigurations();
+        if (onSelectedCallback != null) onSelectedCallback.accept(selectedImageName);
     }
 
-    /**
-     * @return the URI string of the selected image, or null if none is selected.
-     */
-    public String getSelectedImageName() {
-        return selectedImageName;
-    }
-
-    public void onImageSelected(Consumer<Path> callback) {
+    public void onImageSelected(Consumer<String> callback) {
         this.onSelectedCallback = callback;
     }
 }

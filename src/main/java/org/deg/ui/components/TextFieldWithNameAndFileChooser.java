@@ -60,5 +60,4 @@ public class TextFieldWithNameAndFileChooser extends TextFieldWithName {
         });
         return chooseSaveToFolder;
     }
-
 }

@@ -45,6 +45,7 @@
 .nameLabel {
     -fx-font-weight: bold;
     -fx-font-size: 20px;
+    -fx-text-alignment: center;
 }
 
 .btn {
@@ -61,35 +62,29 @@
 }
 
 .peerView:hover {
-    -fx-background-color: rgba(217, 242, 217, 1);;
+    -fx-background-color: rgba(217, 242, 217, 1);
     -fx-cursor: hand;
 }
 .toast {
-    -fx-padding: 10px;
+    -fx-padding: 20px;
     -fx-font-size: 14px;
-    -fx-border-width: 1 1 1 1;
-    -fx-border-radius: 10;
     -fx-background-radius: 10;
     -fx-text-alignment: center;
 }
 .success {
-    -fx-background-color: #4FA24F;
-    -fx-border-color: #337533;
+    -fx-background-color: #7db87d;
     -fx-text-fill: white;
 }
 .warning {
-    -fx-background-color: #EEB954;
-    -fx-border-color: #bc9242;
-    -fx-text-fill: #000000;
+    -fx-background-color: #EEBE63;
+    -fx-text-fill: #5c5c5c;
 }
 .error {
-    -fx-background-color: #E6322E;
-    -fx-border-color: #af2926;
+    -fx-background-color: #E96864;
     -fx-text-fill: #fff;
 }
 .info {
-    -fx-background-color: rgb(231, 241, 231);
-    -fx-border-color: rgba(109, 121, 109, 1);
+    -fx-background-color: #E7F1E7;
     -fx-text-fill: #000;
 }
 
@@ -107,20 +102,13 @@
 }
 
 .wrongInput {
-    -fx-background-color: #c84d4b;
+    -fx-background-color: #E96864;
 }
 
 .logo {
     -fx-font-weight: bold;
     -fx-font-size: 30px;
     -fx-font-family: "Noto Naskh Arabic", "Arial";
-}
-
-.selectedProfilePicture {
-    -fx-border-color: #b58f2e;
-    -fx-border-width: 3;
-    -fx-border-radius: 25;
-    -fx-background-radius: 25;
 }
 
 .profilePicture {
@@ -136,4 +124,24 @@
 
 .selected {
     -fx-border-color: #b58f2e !important;
+}
+
+.hiddenTextfield {
+    -fx-background-color: transparent;
+    -fx-text-fill: black;
+    -fx-border-color: transparent;
+}
+.hiddenTextfield:hover{
+    -fx-background-color: rgba(50, 50, 50, 0.2);
+}
+
+.profile-picture-container {
+    -fx-padding: 5;
+    -fx-border-width: 2;
+    -fx-border-radius: 1000;
+    -fx-border-color: transparent;
+}
+.profile-picture-container:hover {
+    -fx-border-color: #b58f2e !important;
+    -fx-cursor: hand;
 }
