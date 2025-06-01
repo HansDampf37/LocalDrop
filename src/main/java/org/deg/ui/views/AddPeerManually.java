@@ -41,40 +41,46 @@ public class AddPeerManually extends Stage {
         TextFieldWithName ipInput = new TextFieldWithName("IP:");
         TextFieldWithName portInput = new TextFieldWithName("Port:");
 
+        nameInput.inputField.setOnAction(event -> ipInput.inputField.requestFocus());
+        ipInput.inputField.setOnAction(event -> portInput.inputField.requestFocus());
+        portInput.inputField.setOnAction(event -> validateAndApply(nameInput, ipInput, portInput));
+
         HBox confirmCancelBox = new HBox(15);
         confirmCancelBox.setAlignment(Pos.CENTER_RIGHT);
         Button cancelButton = new Button("Cancel");
         Button confirmButton = new Button("Confirm");
         cancelButton.setOnAction(e -> Platform.runLater(this::close));
-        confirmButton.setOnMouseClicked(event -> Platform.runLater(() -> {
-            boolean success = true;
-            String name = nameInput.getText();
-            String ip = ipInput.getText();
-            String port = portInput.getText();
-
-            if (name == null || name.trim().isEmpty()) {
-                success = false;
-                nameInput.inputField.getStyleClass().add("wrongInput");
-            } else {
-                nameInput.inputField.getStyleClass().remove("wrongInput");
-            }
-            if (ip == null || ip.trim().isEmpty()) {
-                success = false;
-                ipInput.inputField.getStyleClass().add("wrongInput");
-            } else {
-                ipInput.inputField.getStyleClass().remove("wrongInput");
-            }
-            try {
-                listToAddTo.add(new Peer(name, ip, Integer.parseInt(port), getRandomProfilePicture()));
-                portInput.inputField.getStyleClass().remove("wrongInput");
-                if (success) this.close();
-            } catch (NumberFormatException e) {
-                portInput.inputField.getStyleClass().add("wrongInput");
-            }
-        }));
+        confirmButton.setOnMouseClicked(event -> Platform.runLater(() -> validateAndApply(nameInput, ipInput, portInput)));
         confirmCancelBox.getChildren().addAll(cancelButton, confirmButton);
 
         layout.getChildren().addAll(nameInput, ipInput, portInput, confirmCancelBox);
         return layout;
+    }
+
+    private void validateAndApply(TextFieldWithName nameInput, TextFieldWithName ipInput, TextFieldWithName portInput) {
+        boolean success = true;
+        String name = nameInput.getText();
+        String ip = ipInput.getText();
+        String port = portInput.getText();
+
+        if (name == null || name.trim().isEmpty()) {
+            success = false;
+            nameInput.inputField.getStyleClass().add("wrongInput");
+        } else {
+            nameInput.inputField.getStyleClass().remove("wrongInput");
+        }
+        if (ip == null || ip.trim().isEmpty()) {
+            success = false;
+            ipInput.inputField.getStyleClass().add("wrongInput");
+        } else {
+            ipInput.inputField.getStyleClass().remove("wrongInput");
+        }
+        try {
+            listToAddTo.add(new Peer(name, ip, Integer.parseInt(port), getRandomProfilePicture()));
+            portInput.inputField.getStyleClass().remove("wrongInput");
+            if (success) this.close();
+        } catch (NumberFormatException e) {
+            portInput.inputField.getStyleClass().add("wrongInput");
+        }
     }
 }
