@@ -3,6 +3,7 @@ package org.deg.ui.views;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -25,6 +26,8 @@ public class SettingsView extends VBox {
 
         TextFieldWithName nameInput = new TextFieldWithName("Your Name");
         nameInput.inputField.setText(USERNAME);
+
+        ProfilePictureSelector profilePictureSelector = new ProfilePictureSelector();
 
         TextFieldWithName savePathInput = new TextFieldWithNameAndFileChooser("Save files to:", true);
         savePathInput.inputField.setText(DEFAULT_SAFE_PATH.getAbsolutePath());
@@ -60,6 +63,7 @@ public class SettingsView extends VBox {
             if (success) {
                 USERNAME = nameInput.getText().trim();
                 DEFAULT_SAFE_PATH = new File(savePathInput.getText().trim());
+                PROFILE_PICTURE_NAME = profilePictureSelector.getSelectedImageName();
                 Toast.show((Stage) getScene().getWindow(), "Changes have been saved. They will be visible after a restart.", 3000, ToastMode.SUCCESS);
                 saveConfigurations();
             }
@@ -67,7 +71,7 @@ public class SettingsView extends VBox {
         VBox gap = new VBox();
         VBox.setVgrow(gap, Priority.ALWAYS);
         buttonContainer.getChildren().addAll(revertButton, saveButton);
-        getChildren().addAll(nameInput, savePathInput, gap, buttonContainer);
+        getChildren().addAll(nameInput, profilePictureSelector, savePathInput, gap, buttonContainer);
     }
 
     private boolean usernameValid(String username) {

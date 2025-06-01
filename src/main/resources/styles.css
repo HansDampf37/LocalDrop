@@ -115,3 +115,25 @@
     -fx-font-size: 30px;
     -fx-font-family: "Noto Naskh Arabic", "Arial";
 }
+
+.selectedProfilePicture {
+    -fx-border-color: #b58f2e;
+    -fx-border-width: 3;
+    -fx-border-radius: 25;
+    -fx-background-radius: 25;
+}
+
+.profilePicture {
+    -fx-padding: 2;
+    -fx-border-width: 2;
+    -fx-border-radius: 50;
+    -fx-background-radius: 50;
+}
+
+.profilePicture:hover {
+    -fx-border-color: #444;
+}
+
+.selected {
+    -fx-border-color: #b58f2e !important;
+}
