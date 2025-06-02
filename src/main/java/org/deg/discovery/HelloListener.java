@@ -80,12 +80,12 @@ public class HelloListener implements Runnable {
         if (message.startsWith(HELLO)) {
             Peer peer = Peer.fromHelloMessage(message);
             if (peer != null && !peer.equals(localPeer)) {
-                onNewPeer.accept(peer);
+                if (onNewPeer != null) onNewPeer.accept(peer);
             }
         } else if (message.startsWith(BYE)) {
             Peer peer = Peer.fromByeMessage(message);
             if (peer != null && !peer.equals(localPeer)) {
-                onPeerDisconnected.accept(peer);
+                if (onPeerDisconnected != null) onPeerDisconnected.accept(peer);
             }
         }
     }
