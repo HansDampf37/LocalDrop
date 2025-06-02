@@ -1,5 +1,6 @@
 package org.deg.utils;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -114,8 +115,7 @@ public class Utils {
         try {
             if (os.contains("win")) {
                 // For Windows
-                String cmd = String.format("explorer.exe /select,\"%s\"", file.getAbsolutePath());
-                new ProcessBuilder(cmd).start();
+                Desktop.getDesktop().open(file);
             } else if (os.contains("mac")) {
                 // For macOS
                 String[] cmd = {"open", "-R", file.getAbsolutePath()};
