@@ -6,6 +6,7 @@ import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
@@ -135,8 +136,13 @@ public class PeersSelection extends VBox {
                                     message = "Successfully sent " + successCount + " file(s) to '" + receiver.name() +
                                             "\nFailed to sent " + successCount + " file(s) to " + receiver.name();
                                 }
-                                Stage stage = (Stage) getScene().getWindow();
-                                Toast.show(stage, message, 4000, toastMode);
+                                Scene scene = getScene();
+                                if (scene != null) {
+                                    Stage stage = (Stage) getScene().getWindow();
+                                    Toast.show(stage, message, 4000, toastMode);
+                                } else {
+                                    System.out.println("Cannot show toast because scene is null");
+                                }
                             });
                         }
 
