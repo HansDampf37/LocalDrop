@@ -81,7 +81,7 @@ public class Utils {
      *
      * @param dir the directory whose size is to be calculated
      * @return the total size in bytes of all regular files within the directory
-     * @throws IOException if an I/O error occurs accessing the file system
+     * @throws IOException              if an I/O error occurs accessing the file system
      * @throws IllegalArgumentException if the input is not a directory or doesn't exist
      */
     public static long getDirSize(File dir) throws IOException {
@@ -101,6 +101,39 @@ public class Utils {
                         }
                     })
                     .sum();
+        }
+    }
+
+    public static void openFileExplorer(File file) {
+        if (file == null || !file.exists() || !file.isDirectory()) {
+            System.err.println("File does not exist or is not a directory");
+            return;
+        }
+
+        String os = System.getProperty("os.name").toLowerCase();
+        try {
+            if (os.contains("win")) {
+                // For Windows
+                String cmd = String.format("explorer.exe /select,\"%s\"", file.getAbsolutePath());
+                new ProcessBuilder(cmd).start();
+            } else if (os.contains("mac")) {
+                // For macOS
+                String[] cmd = {"open", "-R", file.getAbsolutePath()};
+                new ProcessBuilder(cmd).start();
+            } else if (os.contains("nix") || os.contains("nux") || os.contains("aix")) {
+                // For Linux
+                File parent = file.isDirectory() ? file : file.getParentFile();
+                if (parent != null) {
+                    String[] cmd = {"xdg-open", parent.getAbsolutePath()};
+                    new ProcessBuilder(cmd).start();
+                } else {
+                    System.err.println("Could not determine parent directory.");
+                }
+            } else {
+                System.err.println("Unsupported operating system: " + os);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
