@@ -8,9 +8,10 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import org.deg.backend.UserConfigurations;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -38,21 +39,36 @@ public class ProfilePictureSelector extends VBox {
         loadImages();
     }
 
+    /**
+     * Loads all images from the resources/profile-pictures directory and render them in the
+     * tilePane.
+     * <br>
+     * <span style="font-weight: bold">WARNING:</span> In order for these images to be
+     * loaded successfully they must appear in the file resource/profile-pictures/index.txt.
+     * This somewhat complicated approach was chosen for jlink to work: In order for Jlink to include
+     * a resource it cannot be loaded via simple iteration over files in a folder. So instead we explicitly
+     * load all files enumerated in index.txt for jlink to actually include them in the packaged application.
+     */
     private void loadImages() {
-        try {
-            URL resource = getClass().getResource("/profile-pictures");
-            if (resource == null) {
-                System.err.println("/profile-pictures resource not found.");
+        try (InputStream indexStream = getClass().getResourceAsStream("/profile-pictures/index.txt")) {
+            if (indexStream == null) {
+                System.err.println("index.txt not found in /profile-pictures.");
                 return;
             }
-            Path folderPath = Path.of(resource.toURI());
-            List<Path> imagePaths = Files.list(folderPath)
-                    .filter(p -> p.toString().endsWith(".png") || p.toString().endsWith(".jpg") || p.toString().endsWith(".jpeg"))
+
+            List<String> imageFilenames = new BufferedReader(new InputStreamReader(indexStream))
+                    .lines()
+                    .filter(name -> name.endsWith(".png") || name.endsWith(".jpg") || name.endsWith(".jpeg"))
                     .toList();
 
-            for (Path path : imagePaths) {
-                String filename = path.getFileName().toString();
-                Image image = new Image(path.toUri().toString());
+            for (String filename : imageFilenames) {
+                URL imageUrl = getClass().getResource("/profile-pictures/" + filename);
+                if (imageUrl == null) {
+                    System.err.println("Could not find image: " + filename);
+                    continue;
+                }
+
+                Image image = new Image(imageUrl.toExternalForm());
                 ImageView imageView = new ImageView(image);
                 imageView.setFitWidth(IMAGE_SIZE);
                 imageView.setFitHeight(IMAGE_SIZE);

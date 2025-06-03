@@ -1,0 +1,71 @@
+bear (1).png
+bear.png
+beaver (1).png
+buffalo.png
+cat (1).png
+cat.png
+chameleon.png
+chicken.png
+clownfish.png
+cow (1).png
+cow.png
+crocodile.png
+dog (1).png
+dog.png
+dragon.png
+eagle.png
+elephant (1).png
+elephant.png
+ferret.png
+fox.png
+frog (1).png
+frog.png
+ghost.png
+giraffe.png
+goat.png
+gorilla.png
+hamster (1).png
+hamster.png
+hen (1).png
+hen.png
+hippopotamus.png
+jaguar (1).png
+jaguar.png
+jellyfish.png
+koala (1).png
+koala.png
+labrador-retriever.png
+lemur.png
+lion.png
+llama.png
+meerkat.png
+moose.png
+mouse.png
+ostrich.png
+owl.png
+panda (1).png
+panda.png
+penguin (1).png
+penguin (2).png
+penguin.png
+pig.png
+puffer-fish.png
+raccoon.png
+robot.png
+rooster.png
+sea-lion.png
+shark.png
+sloth.png
+snake.png
+snowy-owl.png
+squirrel.png
+swan.png
+tiger.png
+unicorn.png
+walrus (1).png
+walrus.png
+weasel.png
+wild-boar.png
+wolf (1).png
+wolf.png
+zombie (1).png
