@@ -45,8 +45,8 @@ public class LogView extends VBox {
         VBox.setVgrow(sentLogs, Priority.ALWAYS);
         vbox1.getChildren().addAll(labelSentLogs, sentLogs);
 
-        // Second column
-        VBox vbox2 = new VBox(5);
+        // Second row
+        VBox vbox2 = new VBox(15);
         Label labelReceivedLog = new Label("Received:");
         labelReceivedLog.getStyleClass().add("h1");
 
