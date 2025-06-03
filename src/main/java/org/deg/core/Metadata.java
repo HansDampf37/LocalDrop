@@ -13,8 +13,10 @@ public class Metadata {
 
     /**
      * Constructs a metadata object for a file.
+     * @param fileCount The number of files.
      * @param fileNames The name of the file.
      * @param fileSizes The size of the file in bytes.
+     * @param sender the sending peer
      */
     public Metadata(int fileCount, List<String> fileNames, List<Long> fileSizes, Peer sender) {
         this.fileCount = fileCount;

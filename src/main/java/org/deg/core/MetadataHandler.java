@@ -96,7 +96,7 @@ public class MetadataHandler {
     public static List<FileWithMetadata> buildFilesWithMetadataList(Metadata metadata) {
         List<FileWithMetadata> receivedFiles = new ArrayList<>();
         for (int i = 0; i < metadata.fileCount; i++) {
-            String name = metadata.fileNames.get(i);
+            String name = metadata.fileNames.get(i).replace("/", File.separator);
             File file = new File(UserConfigurations.DEFAULT_SAFE_PATH, name);
             long size = metadata.fileSizes.get(i);
             FileWithMetadata fileWithMetadata = new FileWithMetadata(file, name, size, null);

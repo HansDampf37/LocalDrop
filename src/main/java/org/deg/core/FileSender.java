@@ -66,7 +66,7 @@ public class FileSender {
         System.out.println("Send transmission request to " + receiver.name());
         Metadata metadata = new Metadata(
                 files.size(),
-                files.stream().map(f -> f.relativePath).toList(),
+                files.stream().map(f -> f.relativePath.replace(File.separator, "/")).toList(),
                 files.stream().map(f ->f.sizeInBytes).toList(),
                 sender
         );
