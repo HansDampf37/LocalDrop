@@ -25,7 +25,7 @@ public class LogView extends VBox {
 
         // First row
         VBox vbox1 = new VBox(15);
-        Label labelSentLogs = new Label("Sent:");
+        Label labelSentLogs = new Label("Sent");
         labelSentLogs.getStyleClass().add("h1");
         ListView<Pair<Peer, File>> sentLogs = new ListView<>();
         ObservableList<Pair<Peer, File>> sentLogsList = FXCollections.observableArrayList(backend.getSentLog());
@@ -47,7 +47,7 @@ public class LogView extends VBox {
 
         // Second row
         VBox vbox2 = new VBox(15);
-        Label labelReceivedLog = new Label("Received:");
+        Label labelReceivedLog = new Label("Received");
         labelReceivedLog.getStyleClass().add("h1");
 
         ListView<Pair<Peer, File>> receivedLogs = new ListView<>();
