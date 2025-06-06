@@ -1,18 +1,22 @@
 package org.deg.ui;
 
+import javafx.animation.RotateTransition;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import javafx.util.Duration;
 import org.deg.backend.Backend;
+import org.deg.ui.components.IconButton;
 import org.deg.ui.components.Logo;
 import org.deg.ui.components.NavButton;
 import org.deg.ui.views.LogView;
@@ -24,7 +28,7 @@ import java.io.IOException;
 import java.util.Objects;
 
 public class NetworkTransferUI extends Application {
-    private final Backend backend;
+    private Backend backend;
     private StackPane mainContent;
     private Pane receiveView;
     private Pane sendView;
@@ -32,6 +36,7 @@ public class NetworkTransferUI extends Application {
     private NavButton btnReceive;
     private NavButton btnSend;
     private NavButton btnLogs;
+    private RotateTransition rotate;
 
     public NetworkTransferUI() {
         Backend backend1;
@@ -61,11 +66,15 @@ public class NetworkTransferUI extends Application {
             if (backend != null) backend.stop();
             System.exit(0);
         });
-        if (backend != null) backend.setFileReceivedHandler(new FileReceivingHandler(primaryStage));
+        if (backend != null) {
+            backend.start();
+            backend.setFileReceivedHandler(new FileReceivingHandler(primaryStage));
+        }
 
         BorderPane borderPane = new BorderPane();
         VBox navBar = createNavBar();
         borderPane.setLeft(navBar);
+        if (backend == null) borderPane.setTop(getDisconnectedLabel(primaryStage));
 
         mainContent = new StackPane();
         receiveView = new ReceiveView(backend == null ? null : backend.getLocalPeer());
@@ -144,5 +153,42 @@ public class NetworkTransferUI extends Application {
         btnSend.deactivate();
         btnLogs.deactivate();
         mainContent.getChildren().setAll(new SettingsView());
+    }
+
+    private HBox getDisconnectedLabel(Stage stage) {
+        Label label = new Label("You are not connected to any network. Please connect to a wifi and try again.");
+        HBox box = new HBox();
+        box.getStyleClass().add("error");
+        box.setPadding(new Insets(10));
+        HBox.setHgrow(box, Priority.ALWAYS);
+        box.setAlignment(Pos.CENTER_LEFT);
+
+        label.setStyle("-fx-font-weight: bold;");
+        label.getStyleClass().add("error");
+
+        HBox gap = new HBox();
+        HBox.setHgrow(gap, Priority.ALWAYS);
+
+        ImageView reloadIcon = new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/icons/reload.png")).toExternalForm()));
+        IconButton reloadButton = new IconButton(reloadIcon);
+        rotate = new RotateTransition(Duration.seconds(10), reloadIcon);
+        rotate.setByAngle(3600);
+        rotate.setCycleCount(RotateTransition.INDEFINITE);
+        rotate.setInterpolator(javafx.animation.Interpolator.LINEAR);
+        reloadButton.setOnAction(e -> reloadBackend(stage));
+
+        box.getChildren().addAll(label, gap, reloadButton);
+        return box;
+    }
+
+    private void reloadBackend(Stage stage) {
+        rotate.play();
+        try {
+            backend = new Backend();
+            start(stage);
+        } catch (IOException ignored) {
+        } finally {
+            rotate.stop();
+        }
     }
 }
