@@ -172,7 +172,7 @@ public class PeersSelection extends VBox {
                     };
                     peerView.setOnMouseClicked(e -> {
                         peerView.onTransmissionRequested();
-                        backend.startFilesTransfer(backend.localPeer, peer, filesToSend, callback);
+                        backend.startFilesTransfer(backend.getLocalPeer(), peer, filesToSend, callback);
                     });
                     setPadding(new Insets(0));
                     setGraphic(peerView);

@@ -20,24 +20,28 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
+import static org.deg.core.Constants.HELLO_PORT;
+import static org.deg.utils.Utils.sendUDPBroadcast;
+
 /**
  * Handles backend operations for LAN file sharing, including peer initialization,
  * dynamic port allocation, and lifecycle control of file receiver and discovery listener.
  */
 public class Backend {
-    public final Peer localPeer;
-    private final FileReceiver fileReceiver;
-    private final DiscoveryListener discoveryListener;
-    private final HelloListener helloListener;
+    private Peer localPeer;
+    private boolean online = false;
+    private FileReceiver fileReceiver;
+    private DiscoveryListener discoveryListener;
+    private HelloListener helloListener;
     private static final ExecutorService executor = Executors.newCachedThreadPool();
     private final List<Pair<Peer, File>> sentLog = new ArrayList<>();
 
+
     /**
-     * Constructs a backend with a unique peer name, dynamic port, and LAN-compatible IP.
-     *
-     * @throws IOException if no suitable IP address or port can be found.
+     * Creates the local peer on a free port.
+     * Starts the backend by launching file receiver and hallo + discovery listener in background threads.
      */
-    public Backend() throws IOException {
+    public void start() throws IOException {
         UserConfigurations.loadConfigurations();
         String peerName = UserConfigurations.USERNAME;
         String localIp = findLanAddress();
@@ -47,12 +51,7 @@ public class Backend {
         fileReceiver = new FileReceiver(fileTransferPort);
         discoveryListener = new DiscoveryListener(localPeer);
         helloListener = new HelloListener(localPeer, null, null);
-    }
 
-    /**
-     * Starts the backend by launching file receiver and hallo + discovery listener in background threads.
-     */
-    public void start() {
         Thread receiverThread = new Thread(fileReceiver);
         receiverThread.start();
 
@@ -61,12 +60,15 @@ public class Backend {
 
         Thread helloListenerThread = new Thread(helloListener);
         helloListenerThread.start();
+
+        online = true;
     }
 
     /**
      * Stops the backend gracefully.
      */
     public void stop() {
+        online = false;
         fileReceiver.stop();
         discoveryListener.stop();
         helloListener.stop();
@@ -153,5 +155,19 @@ public class Backend {
 
     public List<Pair<Peer, File>> getReceivedLog() {
         return fileReceiver.getReceivedLog();
+    }
+
+    public boolean isOnline() {
+        return online;
+    }
+
+    public Peer getLocalPeer() {
+        return localPeer;
+    }
+
+    public void setLocalPeer(Peer localPeer) {
+        sendUDPBroadcast(localPeer.toByeMessage(), HELLO_PORT);
+        this.localPeer = localPeer;
+        sendUDPBroadcast(localPeer.toHelloMessage(), HELLO_PORT);
     }
 }

@@ -13,6 +13,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
+import org.deg.backend.Backend;
 import org.deg.core.Peer;
 import org.deg.ui.components.IconButton;
 import org.deg.ui.components.ProfilePictureSelector;
@@ -31,20 +32,23 @@ public class ReceiveView extends VBox {
     private final HBox horizontalWrapper = new HBox();
     private final ProfilePictureSelector profilePictureSelector = new ProfilePictureSelector();
     private String selectedProfilePicture;
+    private final Backend backend;
 
-    public ReceiveView(Peer localPeer) {
+    public ReceiveView(Backend backend) {
         super(10);
+        this.backend = backend;
         setPadding(new Insets(10));
         setAlignment(Pos.CENTER);
 
-        nameLabel = createNameField(localPeer.name());
+        Peer localPeer = backend.getLocalPeer();
+        nameLabel = createNameField(backend.isOnline() ? localPeer.name() : USERNAME);
         buttonContainer = createButtonContainer();
         buttonContainer.setVisible(false);
 
         profilePictureContainer.getStyleClass().add("profile-picture-container");
         profilePictureContainer.setOnMouseClicked(event -> toggleProfileSelector());
 
-        setImage(PROFILE_PICTURE_NAME);
+        setImage(backend.isOnline() ? localPeer.profilePicName() : PROFILE_PICTURE_NAME);
 
         profilePictureSelector.onImageSelected(imageName -> {
             setImage(imageName);
@@ -59,8 +63,8 @@ public class ReceiveView extends VBox {
                 new Label("You are visible as:"),
                 profilePictureContainer,
                 nameLabel,
-                new Label("IP: " + localPeer.ip()),
-                new Label("Port: " + localPeer.fileTransferPort())
+                new Label("IP: " + (backend.isOnline() ? localPeer.ip() : "-")),
+                new Label("Port: " + (backend.isOnline() ? localPeer.fileTransferPort() : "-"))
         );
         mainView.setAlignment(Pos.CENTER);
 
@@ -128,13 +132,22 @@ public class ReceiveView extends VBox {
     }
 
     private void onSave() {
-        if (!usernameValid(nameLabel.getText())) {
+        String name = nameLabel.getText().trim();
+        if (!usernameValid(name)) {
             Toast.show((Stage) getScene().getWindow(), "Username is invalid: A valid username can only contain letters, numbers and spaces.", 3000, ToastMode.ERROR);
             return;
         }
-        USERNAME = nameLabel.getText().trim();
+        USERNAME = name;
         PROFILE_PICTURE_NAME = selectedProfilePicture;
         saveConfigurations();
+        if (backend.isOnline()) {
+            backend.setLocalPeer(new Peer(
+                    name,
+                    backend.getLocalPeer().ip(),
+                    backend.getLocalPeer().fileTransferPort(),
+                    selectedProfilePicture
+            ));
+        }
         buttonContainer.setVisible(false);
         horizontalWrapper.getChildren().remove(profilePictureSelector);
         Toast.show((Stage) getScene().getWindow(), "Changes have been saved.", 3000, ToastMode.SUCCESS);

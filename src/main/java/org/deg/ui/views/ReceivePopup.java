@@ -82,6 +82,13 @@ public class ReceivePopup extends Stage {
         scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/styles.css")).toExternalForm());
 
         setScene(scene);
+        this.getIcons().add(new Image(
+                Objects.requireNonNull(getClass().getResource("/logo.png")).toExternalForm(),
+                512.0,
+                512.0,
+                true,
+                true
+        ));
     }
 
     private static ListView<FileWithMetadata> getFileListView(List<FileWithMetadata> files) {

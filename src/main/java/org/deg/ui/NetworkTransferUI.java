@@ -25,7 +25,6 @@ import java.util.Objects;
 
 public class NetworkTransferUI extends Application {
     private final Backend backend = new Backend();
-
     private StackPane mainContent;
     private Pane receiveView;
     private Pane sendView;
@@ -44,6 +43,13 @@ public class NetworkTransferUI extends Application {
 
     @Override
     public void start(Stage primaryStage) {
+        primaryStage.getIcons().add(new Image(
+                Objects.requireNonNull(getClass().getResource("/logo.png")).toExternalForm(),
+                512.0,
+                512.0,
+                true,
+                true
+        ));
         primaryStage.setTitle("Network Transfer UI");
         primaryStage.setOnCloseRequest((WindowEvent event) -> {
             backend.stop();
@@ -56,7 +62,7 @@ public class NetworkTransferUI extends Application {
         borderPane.setLeft(navBar);
 
         mainContent = new StackPane();
-        receiveView = new ReceiveView(backend.localPeer);
+        receiveView = new ReceiveView(backend);
         sendView = new SendView(backend);
         loadReceivePage();
 
