@@ -13,7 +13,6 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
-import org.deg.backend.Backend;
 import org.deg.core.Peer;
 import org.deg.ui.components.IconButton;
 import org.deg.ui.components.ProfilePictureSelector;
@@ -25,55 +24,61 @@ import java.util.Objects;
 import static org.deg.backend.UserConfigurations.*;
 
 public class ReceiveView extends VBox {
-
-    private final Label profilePictureContainer = new Label();
-    private final TextField nameLabel;
-    private final HBox buttonContainer;
-    private final HBox horizontalWrapper = new HBox();
-    private final ProfilePictureSelector profilePictureSelector = new ProfilePictureSelector();
+    private final TextField nameLabel = createNameField();
     private String selectedProfilePicture;
-    private final Backend backend;
 
-    public ReceiveView(Backend backend) {
+    private final ProfilePictureSelector profilePictureSelector = new ProfilePictureSelector();
+    private final Label profilePictureContainer = createProfilePicContainer();
+    private final HBox buttonContainer = createButtonContainer();
+    private final HBox horizontalWrapper = new HBox();
+
+    public ReceiveView(Peer localPeer) {
         super(10);
-        this.backend = backend;
+
         setPadding(new Insets(10));
         setAlignment(Pos.CENTER);
 
-        Peer localPeer = backend.getLocalPeer();
-        nameLabel = createNameField(backend.isOnline() ? localPeer.name() : USERNAME);
-        buttonContainer = createButtonContainer();
-        buttonContainer.setVisible(false);
+        // the profile picture of the user
+        String initialProfilePicture = localPeer != null ? localPeer.profilePicName() : PROFILE_PICTURE_NAME;
+        setImage(initialProfilePicture);
 
-        profilePictureContainer.getStyleClass().add("profile-picture-container");
-        profilePictureContainer.setOnMouseClicked(event -> toggleProfileSelector());
+        // the name of the user
+        String initialName = localPeer != null ? localPeer.name() : USERNAME;
+        nameLabel.setText(initialName);
 
-        setImage(backend.isOnline() ? localPeer.profilePicName() : PROFILE_PICTURE_NAME);
-
-        profilePictureSelector.onImageSelected(imageName -> {
-            setImage(imageName);
-            buttonContainer.setVisible(true);
-        });
-
-        horizontalWrapper.setAlignment(Pos.CENTER);
-        VBox.setVgrow(horizontalWrapper, Priority.ALWAYS);
-        HBox.setHgrow(profilePictureSelector, Priority.ALWAYS);
-
+        // the profile picture, name, ip, and port underneath each other.
         VBox mainView = new VBox(10,
                 new Label("You are visible as:"),
                 profilePictureContainer,
                 nameLabel,
-                new Label("IP: " + (backend.isOnline() ? localPeer.ip() : "-")),
-                new Label("Port: " + (backend.isOnline() ? localPeer.fileTransferPort() : "-"))
+                new Label("IP: " + (localPeer != null ? localPeer.ip() : "-")),
+                new Label("Port: " + (localPeer != null ? localPeer.fileTransferPort() : "-"))
         );
         mainView.setAlignment(Pos.CENTER);
 
         horizontalWrapper.getChildren().add(mainView);
+        horizontalWrapper.setAlignment(Pos.CENTER);
+
+        buttonContainer.setVisible(false);
+
+        VBox.setVgrow(horizontalWrapper, Priority.ALWAYS);
         getChildren().addAll(horizontalWrapper, buttonContainer);
     }
 
-    private TextField createNameField(String initialName) {
-        TextField field = new TextField(initialName);
+    private Label createProfilePicContainer() {
+        Label profilePictureContainer = new Label();
+        profilePictureContainer.getStyleClass().add("profile-picture-container");
+        profilePictureContainer.setOnMouseClicked(event -> toggleProfileSelector());
+        profilePictureSelector.onImageSelected(imageName -> {
+            setImage(imageName);
+            buttonContainer.setVisible(true);
+        });
+        HBox.setHgrow(profilePictureSelector, Priority.ALWAYS);
+        return profilePictureContainer;
+    }
+
+    private TextField createNameField() {
+        TextField field = new TextField();
         field.setAlignment(Pos.CENTER);
         field.getStyleClass().addAll("hiddenTextfield", "nameLabel");
         field.textProperty().addListener((obs, oldText, newText) -> buttonContainer.setVisible(true));
@@ -113,7 +118,7 @@ public class ReceiveView extends VBox {
         saveButton.setContentDisplay(ContentDisplay.LEFT);
 
         revertButton.setOnAction(e -> onRevert());
-        saveButton.setOnAction(e -> onSave());
+        saveButton.setOnAction(e -> save());
 
         box.getChildren().addAll(revertButton, saveButton);
         return box;
@@ -131,7 +136,7 @@ public class ReceiveView extends VBox {
         Toast.show((Stage) getScene().getWindow(), "Changes have been reverted", 3000, ToastMode.SUCCESS);
     }
 
-    private void onSave() {
+    private void save() {
         String name = nameLabel.getText().trim();
         if (!usernameValid(name)) {
             Toast.show((Stage) getScene().getWindow(), "Username is invalid: A valid username can only contain letters, numbers and spaces.", 3000, ToastMode.ERROR);
@@ -140,14 +145,6 @@ public class ReceiveView extends VBox {
         USERNAME = name;
         PROFILE_PICTURE_NAME = selectedProfilePicture;
         saveConfigurations();
-        if (backend.isOnline()) {
-            backend.setLocalPeer(new Peer(
-                    name,
-                    backend.getLocalPeer().ip(),
-                    backend.getLocalPeer().fileTransferPort(),
-                    selectedProfilePicture
-            ));
-        }
         buttonContainer.setVisible(false);
         horizontalWrapper.getChildren().remove(profilePictureSelector);
         Toast.show((Stage) getScene().getWindow(), "Changes have been saved.", 3000, ToastMode.SUCCESS);

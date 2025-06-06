@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.util.Objects;
 
 public class NetworkTransferUI extends Application {
-    private final Backend backend = new Backend();
+    private final Backend backend;
     private StackPane mainContent;
     private Pane receiveView;
     private Pane sendView;
@@ -33,8 +33,14 @@ public class NetworkTransferUI extends Application {
     private NavButton btnSend;
     private NavButton btnLogs;
 
-    public NetworkTransferUI() throws IOException {
-        backend.start();
+    public NetworkTransferUI() {
+        Backend backend1;
+        try {
+            backend1 = new Backend();
+        } catch (IOException e) {
+            backend1 = null;
+        }
+        backend = backend1;
     }
 
     public static void main(String[] args) {
@@ -52,17 +58,17 @@ public class NetworkTransferUI extends Application {
         ));
         primaryStage.setTitle("Network Transfer UI");
         primaryStage.setOnCloseRequest((WindowEvent event) -> {
-            backend.stop();
+            if (backend != null) backend.stop();
             System.exit(0);
         });
-        backend.setFileReceivedHandler(new FileReceivingHandler(primaryStage));
+        if (backend != null) backend.setFileReceivedHandler(new FileReceivingHandler(primaryStage));
 
         BorderPane borderPane = new BorderPane();
         VBox navBar = createNavBar();
         borderPane.setLeft(navBar);
 
         mainContent = new StackPane();
-        receiveView = new ReceiveView(backend);
+        receiveView = new ReceiveView(backend == null ? null : backend.getLocalPeer());
         sendView = new SendView(backend);
         loadReceivePage();
 

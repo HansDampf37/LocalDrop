@@ -15,6 +15,7 @@ import org.deg.core.Peer;
 import org.deg.ui.components.FileLog;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import static org.deg.utils.Utils.openFileExplorer;
 
@@ -28,7 +29,7 @@ public class LogView extends VBox {
         Label labelSentLogs = new Label("Sent");
         labelSentLogs.getStyleClass().add("h1");
         ListView<Pair<Peer, File>> sentLogs = new ListView<>();
-        ObservableList<Pair<Peer, File>> sentLogsList = FXCollections.observableArrayList(backend.getSentLog());
+        ObservableList<Pair<Peer, File>> sentLogsList = FXCollections.observableArrayList(backend == null ? new ArrayList<>(): backend.getSentLog());
         sentLogs.setItems(sentLogsList);
         sentLogs.setCellFactory(lv -> new ListCell<>() {
             @Override
@@ -51,7 +52,7 @@ public class LogView extends VBox {
         labelReceivedLog.getStyleClass().add("h1");
 
         ListView<Pair<Peer, File>> receivedLogs = new ListView<>();
-        ObservableList<Pair<Peer, File>> receivedLogsList = FXCollections.observableArrayList(backend.getReceivedLog());
+        ObservableList<Pair<Peer, File>> receivedLogsList = FXCollections.observableArrayList(backend == null ? new ArrayList<>() : backend.getReceivedLog());
         receivedLogs.setItems(receivedLogsList);
         receivedLogs.setCellFactory(lv -> new ListCell<>() {
             @Override

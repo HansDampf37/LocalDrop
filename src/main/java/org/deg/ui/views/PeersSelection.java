@@ -49,8 +49,10 @@ public class PeersSelection extends VBox {
         this.filesToSend = selectedFiles;
 
         // configure backend
-        backend.setOnNewPeerCallback((Peer peer) -> Platform.runLater(() -> peers.add(peer)));
-        backend.setOnPeerDisconnectedCallback((Peer peer) -> Platform.runLater(() -> peers.remove(peer)));
+        if (backend != null) {
+            backend.setOnNewPeerCallback((Peer peer) -> Platform.runLater(() -> peers.add(peer)));
+            backend.setOnPeerDisconnectedCallback((Peer peer) -> Platform.runLater(() -> peers.remove(peer)));
+        }
 
         HBox titleBox = new HBox(15);
         Label peersLabel = new Label("Peers");

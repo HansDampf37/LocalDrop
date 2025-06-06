@@ -29,19 +29,13 @@ import static org.deg.utils.Utils.sendUDPBroadcast;
  */
 public class Backend {
     private Peer localPeer;
-    private boolean online = false;
-    private FileReceiver fileReceiver;
-    private DiscoveryListener discoveryListener;
-    private HelloListener helloListener;
+    private final FileReceiver fileReceiver;
+    private final DiscoveryListener discoveryListener;
+    private final HelloListener helloListener;
     private static final ExecutorService executor = Executors.newCachedThreadPool();
     private final List<Pair<Peer, File>> sentLog = new ArrayList<>();
 
-
-    /**
-     * Creates the local peer on a free port.
-     * Starts the backend by launching file receiver and hallo + discovery listener in background threads.
-     */
-    public void start() throws IOException {
+    public Backend() throws IOException {
         UserConfigurations.loadConfigurations();
         String peerName = UserConfigurations.USERNAME;
         String localIp = findLanAddress();
@@ -51,7 +45,14 @@ public class Backend {
         fileReceiver = new FileReceiver(fileTransferPort);
         discoveryListener = new DiscoveryListener(localPeer);
         helloListener = new HelloListener(localPeer, null, null);
+    }
 
+
+    /**
+     * Creates the local peer on a free port.
+     * Starts the backend by launching file receiver and hallo + discovery listener in background threads.
+     */
+    public void start() {
         Thread receiverThread = new Thread(fileReceiver);
         receiverThread.start();
 
@@ -60,15 +61,12 @@ public class Backend {
 
         Thread helloListenerThread = new Thread(helloListener);
         helloListenerThread.start();
-
-        online = true;
     }
 
     /**
      * Stops the backend gracefully.
      */
     public void stop() {
-        online = false;
         fileReceiver.stop();
         discoveryListener.stop();
         helloListener.stop();
@@ -155,10 +153,6 @@ public class Backend {
 
     public List<Pair<Peer, File>> getReceivedLog() {
         return fileReceiver.getReceivedLog();
-    }
-
-    public boolean isOnline() {
-        return online;
     }
 
     public Peer getLocalPeer() {
