@@ -1,3 +1,5 @@
+![](images_readme/view1.png)
+
 # Introduction to the problem
 Sharing data between devices is commonly done via email attachments or messenger apps. However, these methods are limited in terms of the file size they support. For larger files, services like WeTransfer allow users to upload and share files (up to 2 GB) by generating a download link that others can access.
 While convenient, this approach has several drawbacks. Firstly, uploading personal data to third-party servers means relinquishing control over where and how the data is stored. Secondly for some usecases, even 2GB is not sufficient. Thirdly, transferring data to distant servers often introduces bandwidth bottlenecks, significantly reducing transmission speeds. This issue isn’t unique to WeTransfer — it also affects email and messaging apps. 
